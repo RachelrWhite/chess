@@ -1,5 +1,8 @@
 package chess;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -39,6 +42,44 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                squares[i][j] = null;
+            }
+        }
+        //this is where we add all the pieces back to the board:
+        placePawns (2, ChessGame.TeamColor.WHITE);
+        placePawns (7, ChessGame.TeamColor.BLACK);
+        placeOtherPieces (1, ChessGame.TeamColor.WHITE);
+        placeOtherPieces (8, ChessGame.TeamColor.BLACK);
     }
+
+    private void placePawns (int row, ChessGame.TeamColor color) {
+        for (int col = 0; col < 8; col++) {
+            addPiece(new ChessPosition(row, col), new ChessPiece(color, ChessPiece.PieceType.PAWN));
+        }
+    }
+    private void placeOtherPieces (int row, ChessGame.TeamColor color) {
+        ChessPiece.PieceType[] order = {
+                ChessPiece.PieceType.ROOK, ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.BISHOP,
+                ChessPiece.PieceType.KING, ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.BISHOP,
+                ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.ROOK
+        };
+        for (int col = 1; col < 8; col++) {
+            addPiece(new ChessPosition(row, col), new ChessPiece(color, order[col - 1]));
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessBoard that = (ChessBoard) o;
+        return Objects.deepEquals(squares, that.squares);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(squares);
+    }
+//this is where the hashcode goes
 }

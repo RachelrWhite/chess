@@ -1,7 +1,10 @@
 package chess;
 
+import chess.piecemoves.*;
+
 import java.util.Collection;
-import java.util.List;
+import java.util.Objects;
+
 
 /**
  * Represents a single chess piece
@@ -11,12 +14,6 @@ import java.util.List;
  */
 public class ChessPiece {
 
-    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
-    }
-
-    /**
-     * The various different chess piece options
-     */
     public enum PieceType {
         KING,
         QUEEN,
@@ -25,19 +22,41 @@ public class ChessPiece {
         ROOK,
         PAWN
     }
+    private final ChessGame.TeamColor pieceColor;
+    private final PieceType type;
+    private MoveCalculator moveCalculator;
+
+    //called anytime I create a new chess piece
+    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+        this.pieceColor = pieceColor;
+        this.type = type;
+
+        this.moveCalculator = switch (this.type) {
+            case PAWN ->  new PawnMovesCalculator();
+            case ROOK -> new RookMovesCalculator();
+            case BISHOP -> new BishopMovesCalculator();
+            case KNIGHT -> new KnightMovesCalculator();
+            case QUEEN -> new QueenMovesCalculator();
+            case KING -> new KingMovesCalculator();
+        };
+    }
+
+    /**
+     * The various different chess piece options
+     */
 
     /**
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return pieceColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return type;
     }
 
     /**
@@ -48,6 +67,35 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return List.of();
+        return moveCalculator.calculate(board, myPosition, this);
+    }
+
+    /**
+     * write some private helpers that allow me to
+     * index rows and cols using 0-7 instead of 0-8
+     * tell me if something is in bounds
+     * amd return a new chess position
+     */
+    private static int r(ChessPosition p) { return p.getRow()-1; }
+    private static int c(ChessPosition p) { return p.getColumn()-1; }
+
+    private static ChessPosition pos(int r, int c) {
+        return new ChessPosition(r+1 , c +1);
+    }
+
+    public static boolean validPosition(int rIndex, int cIndex) {
+        return rIndex >= 1 && rIndex <= 8 && cIndex >= 1 && cIndex <=8;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return pieceColor == that.pieceColor && type == that.type && Objects.equals(moveCalculator, that.moveCalculator);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceColor, type, moveCalculator);
     }
 }
