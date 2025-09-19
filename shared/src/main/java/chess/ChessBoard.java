@@ -54,6 +54,8 @@ public class ChessBoard {
         placeOtherPieces (8, ChessGame.TeamColor.BLACK);
     }
 
+
+    //functions to place the pawns and other pieces
     private void placePawns (int row, ChessGame.TeamColor color) {
         for (int col = 1; col <= 8; col++) {
             addPiece(new ChessPosition(row, col), new ChessPiece(color, ChessPiece.PieceType.PAWN));

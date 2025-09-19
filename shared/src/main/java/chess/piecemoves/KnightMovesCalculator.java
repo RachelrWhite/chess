@@ -15,7 +15,6 @@ public class KnightMovesCalculator implements MoveCalculator {
         return false;
     }
 
-
     private static final int[][] KNIGHT_OFFSETS = {
             {+1, +2}, {-1, +2}, {+1, -2}, {-1, -2},
             {+2, +1}, {+2, -1}, {-2, +1}, {-2, -1}
