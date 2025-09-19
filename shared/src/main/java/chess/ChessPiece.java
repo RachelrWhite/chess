@@ -87,6 +87,8 @@ public class ChessPiece {
         return rIndex >= 1 && rIndex <= 8 && cIndex >= 1 && cIndex <=8;
     }
 
+
+    //hash and equals functions
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
