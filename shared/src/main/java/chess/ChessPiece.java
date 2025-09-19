@@ -91,11 +91,11 @@ public class ChessPiece {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         ChessPiece that = (ChessPiece) o;
-        return pieceColor == that.pieceColor && type == that.type && Objects.equals(moveCalculator, that.moveCalculator);
+        return pieceColor == that.pieceColor && type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pieceColor, type, moveCalculator);
+        return Objects.hash(pieceColor, type);
     }
 }

@@ -11,7 +11,8 @@ import java.util.Objects;
  */
 public class ChessBoard {
 
-    ChessPiece[][] squares = new ChessPiece[8][8];
+    //just added in the provate final
+    private final ChessPiece[][] squares = new ChessPiece[8][8];
     public ChessBoard() {
         
     }
@@ -24,7 +25,6 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         squares[position.getRow()-1][position.getColumn()-1] = piece;
-
     }
 
     /**
@@ -55,20 +55,22 @@ public class ChessBoard {
     }
 
     private void placePawns (int row, ChessGame.TeamColor color) {
-        for (int col = 0; col < 8; col++) {
+        for (int col = 1; col <= 8; col++) {
             addPiece(new ChessPosition(row, col), new ChessPiece(color, ChessPiece.PieceType.PAWN));
         }
     }
     private void placeOtherPieces (int row, ChessGame.TeamColor color) {
         ChessPiece.PieceType[] order = {
                 ChessPiece.PieceType.ROOK, ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.BISHOP,
-                ChessPiece.PieceType.KING, ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.BISHOP,
+                ChessPiece.PieceType.QUEEN, ChessPiece.PieceType.KING, ChessPiece.PieceType.BISHOP,
                 ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.ROOK
         };
-        for (int col = 1; col < 8; col++) {
+        for (int col = 1; col <= 8; col++) {
             addPiece(new ChessPosition(row, col), new ChessPiece(color, order[col - 1]));
         }
     }
+
+
 
     @Override
     public boolean equals(Object o) {
@@ -80,6 +82,13 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(squares);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessBoard{" +
+                "squares=" + Arrays.toString(squares) +
+                '}';
     }
 //this is where the hashcode goes
 }
