@@ -35,11 +35,3 @@ public class KingMovesCalculator implements MoveCalculator{
         return moves;
     }
 }
-//        if (ChessPiece.validPosition(r-1, c+1) && !isBlocked(r-1, c+1, board, piece)) { moves.add(new ChessMove(from, new ChessPosition(r-1, c+1), null)); }
-//        if (ChessPiece.validPosition(r+1, c) && !isBlocked(r+1, c, board, piece)) { moves.add(new ChessMove(from, new ChessPosition(r+1, c), null)); }
-//        if (ChessPiece.validPosition(r+1, c+1) && !isBlocked(r+1, c+1, board, piece)) { moves.add(new ChessMove(from, new ChessPosition(r+1, c+1), null)); }
-//        if (ChessPiece.validPosition(r, c-1) && !isBlocked(r, c-1, board, piece)) { moves.add(new ChessMove(from, new ChessPosition(r, c-1), null)); }
-//        if (ChessPiece.validPosition(r, c+1) && !isBlocked(r, c+1, board, piece)) { moves.add(new ChessMove(from, new ChessPosition(r, c+1), null)); }
-//        if (ChessPiece.validPosition(r-1, c-1) && !isBlocked(r-1, c-1, board, piece)) { moves.add(new ChessMove(from, new ChessPosition(r-1, c-1), null)); }
-//        if (ChessPiece.validPosition(r-1, c) && !isBlocked(r-1, c, board, piece)) { moves.add(new ChessMove(from, new ChessPosition(r-1, c), null)); }
-//        if (ChessPiece.validPosition(r+1, c-1) && !isBlocked(r+1, c-1, board, piece)) { moves.add(new ChessMove(from, new ChessPosition(r+1, c-1), null)); }
