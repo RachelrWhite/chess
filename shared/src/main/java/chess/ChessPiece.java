@@ -83,6 +83,7 @@ public class ChessPiece {
         return new ChessPosition(r+1 , c +1);
     }
 
+
     public static boolean validPosition(int rIndex, int cIndex) {
         return rIndex >= 1 && rIndex <= 8 && cIndex >= 1 && cIndex <=8;
     }
