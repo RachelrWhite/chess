@@ -30,28 +30,6 @@ public interface MoveCalculator {
 
     Collection<ChessMove> calculate(ChessBoard board, ChessPosition from, ChessPiece piece);
 
-    //this is going to be helpful for the queen, rook, and bishop pieces
-//    static Collection<ChessMove> continueInThisDirection(int rowDir, int colDir, int rowPos, int colPos, ChessPiece piece, ChessBoard board) {
-//        List<ChessMove> moves = new ArrayList<>();
-//        for (int i = 1; ; i++) {
-//            int newRow = rowPos + i * rowDir;
-//            int newCol = colPos + i * colDir;
-//            if (!ChessPiece.validPosition(newRow, newCol)) break;
-//
-//            ChessPiece target = board.getPiece(new ChessPosition(newRow, newCol));
-//
-//            if (target == null) {
-//                moves.add(new ChessMove(new ChessPosition(rowPos, colPos), new ChessPosition(newRow, newCol), null));
-//            } else {
-//                if (target.getTeamColor() != piece.getTeamColor()) {
-//                    moves.add(new ChessMove(new ChessPosition(rowPos, colPos), new ChessPosition(newRow, newCol), null));
-//                    return moves;
-//                }
-//            }
-//        break;
-//        }
-//        return moves;
-//    }
     static Collection<ChessMove> continueInThisDirection(int rowDir, int colDir, int rowPos, int colPos, ChessPiece piece, ChessBoard board) {
         List<ChessMove> moves = new ArrayList<>();
 
@@ -62,12 +40,12 @@ public interface MoveCalculator {
 
             ChessPiece target = board.getPiece(new ChessPosition(r, c));
 
-            if (target == null) {
+            if (target == null) { // empty space
                 moves.add(new ChessMove(new ChessPosition(rowPos, colPos), new ChessPosition(r, c), null));
-            } else {
-                if (target.getTeamColor() != piece.getTeamColor()) {
-                    moves.add(new ChessMove(new ChessPosition(rowPos, colPos), new ChessPosition(r, c), null));
-                }
+            } else if (target.getTeamColor() != piece.getTeamColor()) { // opposite team
+                moves.add(new ChessMove(new ChessPosition(rowPos, colPos), new ChessPosition(r, c), null));
+                break;
+            } else { // same team
                 break;
             }
             r += rowDir;

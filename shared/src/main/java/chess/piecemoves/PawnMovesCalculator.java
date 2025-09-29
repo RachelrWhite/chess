@@ -94,7 +94,7 @@ public class PawnMovesCalculator implements MoveCalculator {
             int r = from.getRow();
             int c = from.getColumn();
 
-            //check to see if the first step forward is good for the black pawns
+            //check to see if the next step forward is good for the black pawns
             int r1 = r - 1;
             if (validPosition(r1, c) && !isBlocked(r1, c, board)) {
                 //this is for the promo

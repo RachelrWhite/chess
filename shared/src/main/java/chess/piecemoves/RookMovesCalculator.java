@@ -19,13 +19,4 @@ public class RookMovesCalculator implements MoveCalculator{
 }
 
 
-//    public static boolean isBlocked(int row, int col, ChessBoard board, ChessPiece piece) {
-//        ChessPiece testPiece = board.getPiece(new ChessPosition(row, col));
-//        if (testPiece == null) {
-//            return false;
-//        }
-//        else if (testPiece.getTeamColor().equals(piece.getTeamColor())) {
-//            return true;
-//        }
-//        return false;
-//    }
+

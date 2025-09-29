@@ -11,7 +11,7 @@ import java.util.Objects;
  */
 public class ChessBoard {
 
-    //just added in the provate final
+    //just added in the private final
     private final ChessPiece[][] squares = new ChessPiece[8][8];
     public ChessBoard() {
         
