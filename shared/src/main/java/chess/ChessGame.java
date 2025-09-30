@@ -10,15 +10,29 @@ import java.util.Collection;
  */
 public class ChessGame {
 
-    public ChessGame() {
-
+    /**
+     * Enum identifying the 2 possible teams in a chess game
+     */
+    public enum TeamColor {
+        WHITE,
+        BLACK
     }
+    //throwing in some fields
+    private ChessBoard newBoard;
+    private TeamColor turn;
+
+    public ChessGame() {
+        newBoard = new ChessBoard();
+        newBoard.resetBoard();
+        turn = TeamColor.WHITE;
+    }
+
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return turn;
     }
 
     /**
@@ -27,16 +41,9 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        turn = team;
     }
 
-    /**
-     * Enum identifying the 2 possible teams in a chess game
-     */
-    public enum TeamColor {
-        WHITE,
-        BLACK
-    }
 
     /**
      * Gets a valid moves for a piece at the given location
@@ -105,7 +112,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        newBoard = board;
     }
 
     /**
@@ -114,6 +121,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+            return newBoard;
     }
 }
