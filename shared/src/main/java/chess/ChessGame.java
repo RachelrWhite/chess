@@ -126,7 +126,9 @@ public class ChessGame {
         Collection<ChessMove> allMoves = piece.pieceMoves(newBoard, startPosition);
         Collection<ChessMove> legalMoves = new ArrayList<>();
         for (ChessMove m : allMoves) {
-            legalMoves.add(m);
+            if (tempMoveKing(startPosition, m, piece.getTeamColor())) {
+                legalMoves.add(m);
+            }
         }
         return legalMoves;
     }
@@ -200,9 +202,27 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        while (!isInCheck(teamColor) && !isInCheckmate(teamColor)) {
-
+        if (isInCheck(teamColor)) {
+            return false;
         }
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition testPos = new ChessPosition(i, j);
+                ChessPiece testPiece = newBoard.getPiece(testPos);
+
+                if (testPiece == null || testPiece.getTeamColor() != teamColor) continue;
+
+                List<ChessMove> candidateMoves = new ArrayList<>();
+                candidateMoves.addAll(validMoves(testPos));
+
+                for (ChessMove m : candidateMoves) {
+                    if (tempMoveKing(testPos, m, teamColor) == true) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -221,5 +241,25 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
             return newBoard;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.equals(newBoard, chessGame.newBoard) && turn == chessGame.turn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(newBoard, turn);
+    }
+
+    @Override
+    public String toString() {
+        return "ChessGame{" +
+                "newBoard=" + newBoard +
+                ", turn=" + turn +
+                '}';
     }
 }
