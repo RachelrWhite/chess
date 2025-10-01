@@ -76,12 +76,6 @@ public class ChessPiece {
      * tell me if something is in bounds
      * amd return a new chess position
      */
-    //private static int r(ChessPosition p) { return p.getRow()-1; }
-    //private static int c(ChessPosition p) { return p.getColumn()-1; }
-
-//    private static ChessPosition pos(int r, int c) {
-//        return new ChessPosition(r+1 , c +1);
-//    }
 
 
     public static boolean validPosition(int rIndex, int cIndex) {
