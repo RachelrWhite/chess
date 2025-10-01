@@ -85,7 +85,6 @@ public class ChessGame {
         throw new IllegalStateException("King not found for " + color);
     }
 
-
     //this one tells you if your piece (target) is under attack from the other team
     public boolean isUnderAttack(ChessPosition kingPos, TeamColor color) {
         for (int i = 1; i <= 8; i++ ) {
@@ -105,7 +104,6 @@ public class ChessGame {
         }
         return false;
     }
-
 
     /**
      * Gets a valid moves for a piece at the given location
