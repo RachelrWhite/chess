@@ -97,11 +97,9 @@ public class ChessGame {
                     for (ChessMove m : moves) {
                         //get the end position of m and see if it is the same as the king position
                         if (m.getEndPosition().equals(kingPos)) {
-                            //newBoard.addPiece(kingPos, saveForLater);
                             return true;
                         }
                     }
-                    //newBoard.addPiece(kingPos, saveForLater);
                 }
             }
         }
