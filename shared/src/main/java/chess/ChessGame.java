@@ -70,8 +70,8 @@ public class ChessGame {
         return safe;
     }
 
-
-    //going to throw in some silly goofy functions to help me do the stuff
+    //this function should probably have a different name because I use it for more than just finding the king
+    //going to throw in some functions to help me do the stuff
     private ChessPosition findKing(TeamColor color) {
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
@@ -153,12 +153,10 @@ public class ChessGame {
             throw new InvalidMoveException("Not your turn");
         }
 
-
         Collection<ChessMove> legalMoves = validMoves(startPos);
         if (legalMoves == null || legalMoves.isEmpty()) {
             throw new InvalidMoveException("No legal moves for that piece");
         }
-
 
         boolean isLegal = false;
         for (ChessMove m : legalMoves) {
