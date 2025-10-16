@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -30,11 +31,12 @@ public class MemoryDataAccess implements UserDAO, GameDAO, AuthDAO {
 
     @Override
     public int createGame() throws DataAccessException {
-        return 0;
+
     }
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
+
         return null;
     }
 
@@ -58,11 +60,20 @@ public class MemoryDataAccess implements UserDAO, GameDAO, AuthDAO {
 
     @Override
     public void createUser(UserData user) throws DataAccessException {
-
+        String username = user.username();
+        if (users.containsKey(username)) {
+            throw new RuntimeException("Username already exists");
+        } else {
+            users.put(username, user);
+        }
     }
 
     @Override
-    public void getUser(String username) throws DataAccessException {
-
+    public UserData getUser(String username) throws DataAccessException {
+        if (users.containsKey(username)) {
+            return users.get(username);
+        } else {
+            throw new RuntimeException("Username doesn't exist");
+        }
     }
 }
