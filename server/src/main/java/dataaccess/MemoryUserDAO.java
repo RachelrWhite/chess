@@ -17,17 +17,20 @@ public class MemoryUserDAO implements UserDAO{
 
     @Override
     public void createUser(UserData user) throws DataAccessException {
-        var username = user.username();
-        if (users.containsKey(username)) {
-            throw new DataAccessException("duplicate user");
+        if (user == null || user.username() == null || user.password() == null || user.email() == null) {
+            throw new DataAccessException("bad request");
         }
+
+        String username = user.username();
+        if (users.containsKey(username)) {
+            throw new DataAccessException("already taken");
+        }
+        users.put(username, user);
     }
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
         return users.get(username);
     }
-
-
 
 }

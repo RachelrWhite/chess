@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.*;
 import model.*;
+
 import java.util.UUID;
 
 public class UserService {
@@ -25,6 +26,7 @@ public class UserService {
             throw new DataAccessException("AlreadyTakenException");
         }
     }
+
 
     public void clear() {
         try {
