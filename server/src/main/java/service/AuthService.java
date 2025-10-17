@@ -3,18 +3,16 @@ package service;
 import dataaccess.*;
 import model.*;
 
-public class GameService {
-    private final GameDAO games;
+public class AuthService {
     private final AuthDAO auth;
 
-    public GameService(GameDAO games, AuthDAO auth) {
-        this.games = games;
+    public AuthService(AuthDAO auth) {
         this.auth = auth;
     }
-    //createGame(), listGames(), joinGame() go here
+    // clear method goes here
     public void clear() {
         try {
-            games.clear();
+            auth.clear();
         } catch (DataAccessException e) {
             throw new RuntimeException("Internal error while clearing data", e);
         }

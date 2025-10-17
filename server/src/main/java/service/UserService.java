@@ -25,4 +25,12 @@ public class UserService {
             throw new DataAccessException("AlreadyTakenException");
         }
     }
+
+    public void clear() {
+        try {
+            users.clear();
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Internal error while clearing data", e);
+        }
+    }
 }
