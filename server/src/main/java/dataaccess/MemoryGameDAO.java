@@ -2,7 +2,7 @@ package dataaccess;
 
 import model.AuthData;
 import model.GameData;
-import model.UserData;
+import chess.*;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,6 +11,7 @@ import java.util.Map;
 
 public class MemoryGameDAO implements GameDAO{
     private final Map<Integer, GameData> games = new HashMap<>();
+    private int nextId = 1;
 
     @Override
     public void clear() throws DataAccessException {
@@ -18,8 +19,11 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     @Override
-    public int createGame(GameData initial) throws DataAccessException {
-        return 0;
+    public int createGame(String gameName) throws DataAccessException {
+        int id = nextId++;
+        GameData gd = new GameData(id, null, null, gameName, new ChessGame());
+        games.put(id, gd);
+        return id;
     }
 
     @Override

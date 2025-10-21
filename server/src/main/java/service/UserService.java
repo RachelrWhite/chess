@@ -23,7 +23,7 @@ public class UserService {
             auth.createAuth(new AuthData(token, registerRequest.username()));
             return new RegisterResult(u, token);
         } else {
-            throw new DataAccessException("AlreadyTakenException");
+            throw new DataAccessException("already taken");
         }
     }
 

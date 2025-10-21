@@ -9,6 +9,7 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 import model.*;
 
+import java.util.Collections;
 import java.util.Map;
 
 
@@ -35,8 +36,8 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::register)
                 .post("/session", this::login)
-//                .post("/game/{authToken, gameName}", this::createGame)
-//                .delete("/session/{authToken}", this::logout)
+                .delete("/session", this::logout)
+                .post("/game", this::createGame)
 //                .get("/game/{authToken}", this::listGames)
 //                .put("/game/{authToken, playerColor, gameID}", this::joinGame)
                 .delete("/db", this::clear);
@@ -105,9 +106,9 @@ public class Server {
 
         try {
             LoginResult result = auth.login(request);
-            ctx.status(200)
-                    .contentType("application/json")
-                    .result(gson.toJson(result));
+            ctx.status(200);
+            ctx.contentType("application/json");
+            ctx.result(gson.toJson(result));
             return;
         } catch (DataAccessException e) {
             int status =
@@ -122,6 +123,72 @@ public class Server {
             ctx.status(status)
                     .contentType("application/json")
                     .result(gson.toJson(java.util.Collections.singletonMap("message", msg)));
+            return;
+        }
+    }
+
+    private void logout(Context ctx) {
+        Gson gson = new Gson();
+        String token = ctx.header("Authorization");
+
+        try {
+            auth.logout(token);
+            ctx.status(200);
+            ctx.contentType("application/json");
+            ctx.result(gson.toJson(Collections.emptyMap()));
+            return;
+
+        } catch (DataAccessException e) {
+            String msg = e.getMessage();
+            int status = 500;
+            String errorMessage = "Error: " + msg;
+
+            if (msg != null && msg.equals("unauthorized")) {
+                status = 401;
+                errorMessage = "Error: unauthorized";
+            }
+
+            ctx.status(status);
+            ctx.contentType("application/json");
+            ctx.result(gson.toJson(Collections.singletonMap("message", errorMessage)));
+
+        }
+    }
+
+    private void createGame(Context ctx) throws DataAccessException {
+        Gson gson = new Gson();
+
+        String token = ctx.header("Authorization");
+        CreateGameRequest request = gson.fromJson(ctx.body(), CreateGameRequest.class);
+
+        try {
+            int id = game.createGame(token, request.gameName());
+            ctx.status(200);
+            ctx.contentType("application/json");
+            ctx.result(gson.toJson(new CreateGameResult(id)));
+
+        } catch (DataAccessException e){
+            String m = e.getMessage();
+            int status;
+            String bodyMessage;
+
+            if (m == null) {
+                status = 500;
+                bodyMessage = "Error: unknown";
+            } else if (m.equals("unauthorized")) {
+                status = 401;
+                bodyMessage = "Error: unauthorized";
+            } else if (m.equals("bad request")) {
+                status = 400;
+                bodyMessage = "Error: bad request";
+            } else {
+                status = 500;
+                bodyMessage = "Error: " + m;
+            }
+
+            ctx.status(status);
+            ctx.contentType("application/json");
+            ctx.result(gson.toJson(java.util.Collections.singletonMap("message", bodyMessage)));
             return;
         }
     }

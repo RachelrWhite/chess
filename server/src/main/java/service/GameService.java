@@ -19,4 +19,17 @@ public class GameService {
             throw new RuntimeException("Internal error while clearing data", e);
         }
     }
+
+    public int createGame(String authToken, String gameName) throws DataAccessException {
+            if (authToken == null || authToken.isBlank()) {
+                throw new DataAccessException("unauthorized");
+            }
+            if (auth.getAuth(authToken) == null) {
+                throw new DataAccessException("unauthorized");
+            }
+            if (gameName == null || gameName.isBlank()) {
+                throw new DataAccessException("bad request");
+            }
+            return games.createGame(gameName);
+    }
 }
