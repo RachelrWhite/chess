@@ -39,7 +39,7 @@ public class Server {
                 .delete("/session", this::logout)
                 .post("/game", this::createGame)
 //                .get("/game/{authToken}", this::listGames)
-//                .put("/game/{authToken, playerColor, gameID}", this::joinGame)
+                .put("/game", this::joinGame)
                 .delete("/db", this::clear);
     }
 
@@ -51,19 +51,6 @@ public class Server {
     public void stop() {
         javalin.stop();
     }
-
-//    private void register(Context ctx) {
-//        UserData userData = new Gson().fromJson(ctx.body(), UserData.class);
-//        RegisterResult registerResult = null;
-//        try {
-//            registerResult = user.register(new RegisterRequest(userData.username(), userData.password(), userData.email()));
-//        } catch (DataAccessException e) {
-//            ctx.status(403);
-//            ctx.json("message: Error");
-//        }
-//        ctx.status(200);
-//        ctx.json(new Gson().toJson(registerResult));
-//    }
 
     private void register(Context ctx) {
         Gson gson = new Gson();
@@ -189,7 +176,47 @@ public class Server {
             ctx.status(status);
             ctx.contentType("application/json");
             ctx.result(gson.toJson(java.util.Collections.singletonMap("message", bodyMessage)));
-            return;
+
+        }
+    }
+
+    private void joinGame(Context ctx) throws DataAccessException {
+        Gson gson = new Gson();
+        String token = ctx.header("Authorization");
+        JoinGameRequest request = gson.fromJson(ctx.body(), JoinGameRequest.class);
+
+        try {
+            game.joinGame(token, request.playerColor(), request.gameID());
+
+            ctx.status(200);
+            ctx.contentType("application/json");
+            ctx.result(gson.toJson(java.util.Collections.emptyMap()));
+
+        } catch (DataAccessException e) {
+            String m = e.getMessage();
+            int status;
+            String bodyMessage;
+
+            if (m == null) {
+                status = 500;
+                bodyMessage = "Error: unknown";
+            } else if (m.equals("unauthorized")) {
+                status = 401;
+                bodyMessage = "Error: unauthorized";
+            } else if (m.equals("bad request")) {
+                status = 400;
+                bodyMessage = "Error: bad request";
+            } else if (m.equals("already taken")) {
+                status = 403;
+                bodyMessage = "Error: already taken";
+            } else {
+                status = 500;
+                bodyMessage = "Error: " + m;
+            }
+
+            ctx.status(status);
+            ctx.contentType("application/json");
+            ctx.result(gson.toJson(java.util.Collections.singletonMap("message", bodyMessage)));
         }
     }
 

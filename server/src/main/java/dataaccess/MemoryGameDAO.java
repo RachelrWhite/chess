@@ -4,10 +4,7 @@ import model.AuthData;
 import model.GameData;
 import chess.*;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MemoryGameDAO implements GameDAO{
     private final Map<Integer, GameData> games = new HashMap<>();
@@ -28,7 +25,7 @@ public class MemoryGameDAO implements GameDAO{
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        return null;
+        return games.get(gameID);
     }
 
     @Override
@@ -38,6 +35,9 @@ public class MemoryGameDAO implements GameDAO{
 
     @Override
     public void updateGame(GameData updated) throws DataAccessException {
-
+        if (updated == null || !games.containsKey(updated.gameID())) {
+            throw new DataAccessException("bad request");
+        }
+        games.put(updated.gameID(), updated);
     }
 }
