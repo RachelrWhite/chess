@@ -2,6 +2,8 @@ package service;
 
 import dataaccess.*;
 import model.*;
+import chess.*;
+import java.util.Collection;
 
 public class GameService {
     private final GameDAO games;
@@ -74,7 +76,7 @@ public class GameService {
                 var updated = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
                 games.updateGame(updated);
             }
-        //BLACK
+            //BLACK
         } else {
             String current = game.blackUsername();
             if (current != null && !current.equals(username)) {
@@ -87,5 +89,27 @@ public class GameService {
         }
     }
 
+    public ListGamesResult listGames(String token) throws DataAccessException {
+        var authData = auth.getAuth(token);
+        if (authData == null) {
+            throw new DataAccessException("unauthorized");
+        }
+
+        Collection<GameData> gamesCollection = games.listGames();
+
+// If you're on Java 16+, Stream.toList() works:
+        Collection<GameSummary> summaries = gamesCollection.stream()
+                .map(g -> new GameSummary(
+                        g.gameID(),
+                        g.whiteUsername(),
+                        g.blackUsername(),
+                        g.gameName()))
+                .toList();
+
+        return new ListGamesResult(summaries);
+    }
 
 }
+
+
+

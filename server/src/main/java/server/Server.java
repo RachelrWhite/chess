@@ -38,7 +38,7 @@ public class Server {
                 .post("/session", this::login)
                 .delete("/session", this::logout)
                 .post("/game", this::createGame)
-//                .get("/game/{authToken}", this::listGames)
+                .get("/game", this::listGames)
                 .put("/game", this::joinGame)
                 .delete("/db", this::clear);
     }
@@ -217,6 +217,31 @@ public class Server {
             ctx.status(status);
             ctx.contentType("application/json");
             ctx.result(gson.toJson(java.util.Collections.singletonMap("message", bodyMessage)));
+        }
+    }
+
+    private void listGames(Context ctx) throws DataAccessException {
+        Gson gson = new Gson();
+        String token = ctx.header("Authorization");
+
+        try {
+            if (token == null || token.isBlank()) {
+                ctx.status(401);
+                ctx.result(gson.toJson(Map.of("message", "Error: unauthorized")));
+            }
+            ListGamesResult result = game.listGames(token);
+            ctx.status(200);
+            ctx.contentType("application/json");
+            ctx.result(gson.toJson(result));
+
+        } catch (DataAccessException e) {
+            if ("unauthorized".equalsIgnoreCase(e.getMessage())) {
+                ctx.status(401);
+                ctx.result(gson.toJson(Map.of("message", "Error: unauthorized")));
+            } else {
+                ctx.status(500);
+                ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+            }
         }
     }
 

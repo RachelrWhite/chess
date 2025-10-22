@@ -1,4 +1,6 @@
 package model;
 
-public record ListGamesRequest(String authToken) {
+import java.util.Collection;
+
+public record ListGamesRequest(Collection<GameSummary> games) {
 }
