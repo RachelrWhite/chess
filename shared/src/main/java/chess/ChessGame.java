@@ -117,7 +117,9 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = newBoard.getPiece(startPosition);
-        if (piece == null) return null;
+        if (piece == null) {
+            return null;
+        }
 
         Collection<ChessMove> allMoves = piece.pieceMoves(newBoard, startPosition);
         Collection<ChessMove> legalMoves = new ArrayList<>();
@@ -205,17 +207,23 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        if (!isInCheck(teamColor)) return false;
+        if (!isInCheck(teamColor)) {
+            return false;
+        }
         ChessPosition kingPos0 = findKing(teamColor);
 
         for ( int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
                 ChessPosition from = new ChessPosition(i, j);
                 ChessPiece p = newBoard.getPiece(from);
-                if (p == null || p.getTeamColor() != teamColor) continue;
+                if (p == null || p.getTeamColor() != teamColor) {
+                    continue;
+                }
 
                 Collection<ChessMove> moves = p.pieceMoves(newBoard, from);
-                if (moves == null) continue;
+                if (moves == null) {
+                    continue;
+                }
 
                 for (ChessMove m : moves) {
                     if (tempMoveKing(from, m, teamColor)) {
@@ -245,7 +253,9 @@ public class ChessGame {
                 ChessPosition testPos = new ChessPosition(i, j);
                 ChessPiece testPiece = newBoard.getPiece(testPos);
 
-                if (testPiece == null || testPiece.getTeamColor() != teamColor) continue;
+                if (testPiece == null || testPiece.getTeamColor() != teamColor) {
+                    continue;
+                }
 
                 List<ChessMove> candidateMoves = new ArrayList<>();
                 candidateMoves.addAll(validMoves(testPos));
@@ -280,7 +290,9 @@ public class ChessGame {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ChessGame chessGame = (ChessGame) o;
         return Objects.equals(newBoard, chessGame.newBoard) && turn == chessGame.turn;
     }

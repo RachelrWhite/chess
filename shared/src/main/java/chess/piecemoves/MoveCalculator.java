@@ -16,17 +16,6 @@ public interface MoveCalculator {
         return rIndex >= 1 && rIndex <= 8 && cIndex >= 1 && cIndex <= 8;
     }
 
-    static boolean isEnemyPiece(int row, int col, ChessBoard board, ChessPiece piece) {
-        ChessPiece tempPiece = board.getPiece(new ChessPosition(row, col));
-        if (tempPiece == null) {
-            return false;
-        }
-        if (!tempPiece.getTeamColor().equals(piece.getTeamColor())) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     Collection<ChessMove> calculate(ChessBoard board, ChessPosition from, ChessPiece piece);
 

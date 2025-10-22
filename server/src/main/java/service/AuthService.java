@@ -32,8 +32,12 @@ public class AuthService {
     }
 
     public void logout(String authToken) throws DataAccessException {
-        if (authToken == null || authToken.isBlank()) throw new DataAccessException("unauthorized");
-        if (auth.getAuth(authToken) == null) throw new DataAccessException("unauthorized");
+        if (authToken == null || authToken.isBlank()) {
+            throw new DataAccessException("unauthorized");
+        }
+        if (auth.getAuth(authToken) == null) {
+            throw new DataAccessException("unauthorized");
+        }
         auth.deleteAuth(authToken);
     }
 

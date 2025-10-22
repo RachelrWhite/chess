@@ -17,17 +17,17 @@ public class MemoryAuthDAO implements AuthDAO{
 
     @Override
     public void createAuth(AuthData auth) throws DataAccessException {
-        auths.put(auth.AuthToken(), auth);
+        auths.put(auth.authToken(), auth);
     }
 
     @Override
-    public AuthData getAuth(String AuthToken) throws DataAccessException {
-        return auths.get(AuthToken);
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        return auths.get(authToken);
     }
 
     @Override
 
-    public void deleteAuth(String AuthToken) throws DataAccessException {
-        auths.remove(AuthToken);
+    public void deleteAuth(String authToken) throws DataAccessException {
+        auths.remove(authToken);
     }
 }
