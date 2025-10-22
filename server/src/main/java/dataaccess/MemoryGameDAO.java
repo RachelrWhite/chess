@@ -30,7 +30,7 @@ public class MemoryGameDAO implements GameDAO{
 
     @Override
     public Collection<GameData> listGames() throws DataAccessException {
-        return List.of();
+        return games.values().stream().toList();
     }
 
     @Override
