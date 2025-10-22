@@ -183,11 +183,25 @@ public class Server {
     private void joinGame(Context ctx) throws DataAccessException {
         Gson gson = new Gson();
         String token = ctx.header("Authorization");
-        JoinGameRequest request = gson.fromJson(ctx.body(), JoinGameRequest.class);
 
         try {
-            game.joinGame(token, request.playerColor(), request.gameID());
+            if (token == null || token.isBlank()) {
+                ctx.status(401).result(gson.toJson(Map.of("message", "Error: unauthorized")));
+                return;
+            }
+            JoinGameRequest request = gson.fromJson(ctx.body(), JoinGameRequest.class);
 
+            if (request == null || request.gameID() == null) {
+                ctx.status(400).result(gson.toJson(Map.of("message", "Error: bad request")));
+                return;
+            }
+
+            String color = request.playerColor();
+            if (color == null || !(color.equalsIgnoreCase("WHITE") || color.equalsIgnoreCase("BLACK"))) {
+                ctx.status(400).result(gson.toJson(Map.of("message", "Error: bad request")));
+                return;
+            }
+            game.joinGame(token, request.playerColor(), request.gameID());
             ctx.status(200);
             ctx.contentType("application/json");
             ctx.result(gson.toJson(java.util.Collections.emptyMap()));
@@ -200,13 +214,13 @@ public class Server {
             if (m == null) {
                 status = 500;
                 bodyMessage = "Error: unknown";
-            } else if (m.equals("unauthorized")) {
+            } else if (m.equalsIgnoreCase("unauthorized")) {
                 status = 401;
                 bodyMessage = "Error: unauthorized";
-            } else if (m.equals("bad request")) {
+            } else if (m.equalsIgnoreCase("bad request")) {
                 status = 400;
                 bodyMessage = "Error: bad request";
-            } else if (m.equals("already taken")) {
+            } else if (m.equalsIgnoreCase("already taken")) {
                 status = 403;
                 bodyMessage = "Error: already taken";
             } else {

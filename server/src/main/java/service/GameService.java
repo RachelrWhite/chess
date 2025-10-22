@@ -37,41 +37,44 @@ public class GameService {
     }
 
     public void joinGame(String authToken, String playerColor, Integer gameID) throws DataAccessException {
+        //this is for if there is no auth token
         if (authToken == null || authToken.isBlank()) {
             throw new DataAccessException("unauthorized");
         }
         var authData = auth.getAuth(authToken);
-
+        //this is for if there is no authData in the authToken
         if (authData == null) {
             throw new DataAccessException("unauthorized");
         }
-
         String username = authData.username();
 
+        //this is for if there is no gameID that matches their request
         if (gameID == null) {
             throw new DataAccessException("bad request");
         }
         var game = games.getGame(gameID);
+        //this if for if there are no actual games with that gameID
         if (game == null) {
             throw new DataAccessException("bad request");
         }
-
+        //this is for if there is no playerColor
         if (playerColor == null || playerColor.isBlank()) {
             return;
         }
-
         String color = playerColor.toUpperCase();
+        //this is for if the playerColor isn't white or black
         if (!color.equals("WHITE") && !color.equals("BLACK")) {
             throw new DataAccessException("bad request");
         }
 
-
+        //this is for if the color is white
         if (color.equals("WHITE")) {
             String current = game.whiteUsername();
+            //cant join with the wrong username
             if (current != null && !current.equals(username)) {
                 throw new DataAccessException("already taken");
             }
-
+            //cant not have a current color
             if (current == null) {
                 var updated = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
                 games.updateGame(updated);
