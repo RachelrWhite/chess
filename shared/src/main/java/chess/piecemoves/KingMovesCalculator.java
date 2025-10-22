@@ -4,15 +4,12 @@ import chess.*;
 import java.util.*;
 
 public class KingMovesCalculator implements MoveCalculator{
-    public static boolean isBlocked(int row, int col, ChessBoard board, ChessPiece piece) {
-        ChessPiece testPiece = board.getPiece(new ChessPosition(row, col));
+    public static boolean isBlocked(int kingRow, int kingCol, ChessBoard board, ChessPiece piece) {
+        ChessPiece testPiece = board.getPiece(new ChessPosition(kingRow, kingCol));
         if (testPiece == null) {
             return false;
         }
-        else if (testPiece.getTeamColor().equals(piece.getTeamColor())) {
-            return true;
-        }
-        return false;
+        else return testPiece.getTeamColor().equals(piece.getTeamColor());
     }
     private static final int[][] KING_OFFSETS = {
             {-1, +1}, {+1, +0}, {+1, +1}, {+0, -1},
@@ -22,13 +19,13 @@ public class KingMovesCalculator implements MoveCalculator{
     @Override
     public Collection<ChessMove> calculate(ChessBoard board, ChessPosition from, ChessPiece piece) {
         List<ChessMove> moves = new ArrayList<>();
-        int r = from.getRow();
-        int c = from.getColumn();
+        int colKing = from.getColumn();
+        int rowKing = from.getRow();
         for (int[] d : KING_OFFSETS) {
-            int r2 = r + d[0];
-            int c2 = c + d[1];
-            if (ChessPiece.validPosition(r2, c2) && !isBlocked(r2, c2, board, piece)) {
-                moves.add(new ChessMove(from, new ChessPosition(r2, c2), null));
+            int c2King = colKing + d[1];
+            int r2King = rowKing + d[0];
+            if (ChessPiece.validPosition(r2King, c2King) && !isBlocked(r2King, c2King, board, piece)) {
+                moves.add(new ChessMove(from, new ChessPosition(r2King, c2King), null));
             }
         }
 

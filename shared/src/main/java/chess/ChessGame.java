@@ -87,17 +87,16 @@ public class ChessGame {
 
     //this one tells you if your piece (target) is under attack from the other team
     public boolean isUnderAttack(ChessPosition kingPos, TeamColor color) {
-        for (int i = 1; i <= 8; i++ ) {
-            for (int j = 1; j <= 8; j++) {
-                ChessPosition test = new ChessPosition(i, j);
-                if (newBoard.getPiece(test) != null && !newBoard.getPiece(test).getTeamColor().equals(color)) {
-                    List<ChessMove> moves = new ArrayList<>();
-                    moves.addAll(newBoard.getPiece(test).pieceMoves(newBoard, test));
-                    for (ChessMove m : moves) {
-                        //get the end position of m and see if it is the same as the king position
-                        if (m.getEndPosition().equals(kingPos)) {
-                            return true;
-                        }
+        for (int r = 1; r <= 8; r++) {
+            for (int c = 1; c <= 8; c++) {
+                ChessPosition pos = new ChessPosition(r, c);
+                ChessPiece piece = newBoard.getPiece(pos);
+                if (piece == null) continue;
+                if (piece.getTeamColor() == color) continue;
+
+                for (ChessMove move : piece.pieceMoves(newBoard, pos)) {
+                    if (kingPos.equals(move.getEndPosition())) {
+                        return true;
                     }
                 }
             }

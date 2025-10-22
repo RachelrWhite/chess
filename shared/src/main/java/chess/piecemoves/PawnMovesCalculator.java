@@ -12,7 +12,9 @@ public class PawnMovesCalculator implements MoveCalculator {
     public static boolean isBlockedByEnemy(int row, int col,
                                            ChessBoard board,
                                            ChessPiece myPiece) {
-        if (!validPosition(row, col)) return false; // off-board can't have an enemy
+        if (!validPosition(row, col)) {
+            return false; // off-board can't have an enemy
+        }
         ChessPiece target = board.getPiece(new ChessPosition(row, col));
         return target != null && target.getTeamColor() != myPiece.getTeamColor();
     }
@@ -39,7 +41,6 @@ public class PawnMovesCalculator implements MoveCalculator {
         if (validPosition(r1, c) && !isBlocked(r1, c, board)) {
             addMoveOrPromotions(moves, from, r1, c, promoRank);
 
-            // 2-step forward from starting rank (need the square in front AND target clear)
             if (r == startRank) {
                 int r2 = r + 2 * dir;
                 if (validPosition(r2, c) && !isBlocked(r2, c, board)) {
