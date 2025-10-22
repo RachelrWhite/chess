@@ -9,7 +9,9 @@ public class KingMovesCalculator implements MoveCalculator{
         if (testPiece == null) {
             return false;
         }
-        else return testPiece.getTeamColor().equals(piece.getTeamColor());
+        else {
+            return testPiece.getTeamColor().equals(piece.getTeamColor());
+        }
     }
     private static final int[][] KING_OFFSETS = {
             {-1, +1}, {+1, +0}, {+1, +1}, {+0, -1},
