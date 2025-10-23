@@ -100,7 +100,6 @@ public class GameService {
 
         Collection<GameData> gamesCollection = games.listGames();
 
-// If you're on Java 16+, Stream.toList() works:
         Collection<GameSummary> summaries = gamesCollection.stream()
                 .map(g -> new GameSummary(
                         g.gameID(),
