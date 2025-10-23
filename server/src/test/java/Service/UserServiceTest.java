@@ -18,9 +18,9 @@ public class UserServiceTest {
         userService = new UserService(userDAO, authDAO);
     }
 
-    //register()
+    // register()
     @Test
-    public void register_positive_createsUser() throws DataAccessException {
+    public void registerPositiveCreatesUser() throws DataAccessException {
         var req = new RegisterRequest("alice", "password", "a@a.com");
         var res = userService.register(req);
 
@@ -30,7 +30,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void register_negative_usernameTaken() throws DataAccessException {
+    public void registerNegativeUsernameTaken() throws DataAccessException {
         var req = new RegisterRequest("bob", "password", "b@b.com");
         userService.register(req);
         var dupReq = new RegisterRequest("bob", "password", "dup@dup.com");
@@ -39,9 +39,9 @@ public class UserServiceTest {
         assertTrue(ex.getMessage().toLowerCase().contains("taken"));
     }
 
-    //clear()
+    // clear()
     @Test
-    public void clear_positive_clearsAllData() throws DataAccessException {
+    public void clearPositiveClearsAllData() throws DataAccessException {
         var req = new RegisterRequest("chris", "password", "c@c.com");
         userService.register(req);
         assertNotNull(userDAO.getUser("chris"));

@@ -3,7 +3,6 @@ package service;
 import dataaccess.*;
 import model.*;
 import org.junit.jupiter.api.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AuthServiceTest {
@@ -25,7 +24,7 @@ public class AuthServiceTest {
     // ------- login() -------
 
     @Test
-    public void login_positive_validCredentials() throws DataAccessException {
+    public void loginPositiveValidCredentials() throws DataAccessException {
         var request = new LoginRequest("link", "sword");
         var result = authService.login(request);
 
@@ -35,14 +34,14 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void login_negative_badPassword() {
+    public void loginNegativeBadPassword() {
         var request = new LoginRequest("link", "wrong");
         var ex = assertThrows(DataAccessException.class, () -> authService.login(request));
         assertTrue(ex.getMessage().toLowerCase().contains("unauthorized"));
     }
 
     @Test
-    public void login_negative_missingFields() {
+    public void loginNegativeMissingFields() {
         var badRequest = new LoginRequest("", "");
         var ex = assertThrows(DataAccessException.class, () -> authService.login(badRequest));
         assertTrue(ex.getMessage().toLowerCase().contains("bad request"));
@@ -51,7 +50,7 @@ public class AuthServiceTest {
     // ------- logout() -------
 
     @Test
-    public void logout_positive_validToken() throws DataAccessException {
+    public void logoutPositiveValidToken() throws DataAccessException {
         var loginResult = authService.login(new LoginRequest("link", "sword"));
         String token = loginResult.authToken();
 
@@ -61,14 +60,14 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void logout_negative_invalidToken() {
+    public void logoutNegativeInvalidToken() {
         var ex = assertThrows(DataAccessException.class,
                 () -> authService.logout("not-a-real-token"));
         assertTrue(ex.getMessage().toLowerCase().contains("unauthorized"));
     }
 
     @Test
-    public void logout_negative_blankToken() {
+    public void logoutNegativeBlankToken() {
         var ex = assertThrows(DataAccessException.class,
                 () -> authService.logout(""));
         assertTrue(ex.getMessage().toLowerCase().contains("unauthorized"));
@@ -77,7 +76,7 @@ public class AuthServiceTest {
     // ------- clear() -------
 
     @Test
-    public void clear_positive_removesAllAuths() throws DataAccessException {
+    public void clearPositiveRemovesAllAuths() throws DataAccessException {
         var result = authService.login(new LoginRequest("link", "sword"));
         assertNotNull(authDAO.getAuth(result.authToken()));
 
@@ -86,4 +85,3 @@ public class AuthServiceTest {
         assertNull(authDAO.getAuth(result.authToken()), "auth table should be empty after clear()");
     }
 }
-
