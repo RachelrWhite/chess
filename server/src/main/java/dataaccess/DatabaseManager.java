@@ -13,15 +13,27 @@ public class DatabaseManager {
     /*
      * Load the database information for the db.properties file.
      */
-    static {
-//        try {
-//            try (InputStream in = DatabaseManager.class.getClassLoader().getResourceAsStream("db.production")) {
-//
-                loadPropertiesFromResources();
-//            }
-//        }
+                //loadPropertiesFromResources();
 
+    static {
+        try {
+            try (InputStream in = DatabaseManager.class.getClassLoader().getResourceAsStream("db.properties")) {
+                Properties props = new Properties();
+                props.load(in);
+                databaseName = props.getProperty("db.name");
+                dbUsername = props.getProperty("db.user");
+                dbPassword = props.getProperty("db.password");
+
+                String host = props.getProperty("db.host");
+                var port = Integer.parseInt(props.getProperty("db.port"));
+                connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
+
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("unable to process db.properties. " + ex.getMessage());
+        }
     }
+
        //each DAO could create its own table or you could have one function somewhere that creates them all
 
     /**
