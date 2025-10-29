@@ -1,7 +1,5 @@
 package dataaccess;
 
-import model.AuthData;
-import model.GameData;
 import model.UserData;
 
 import java.util.HashMap;
@@ -16,7 +14,7 @@ public class MemoryUserDAO implements UserDAO{
     }
 
     @Override
-    public void createUser(UserData user) throws DataAccessException {
+    public UserData createUser(UserData user) throws DataAccessException {
         if (user == null || user.username() == null || user.password() == null || user.email() == null) {
             throw new DataAccessException("bad request");
         }
@@ -26,6 +24,7 @@ public class MemoryUserDAO implements UserDAO{
             throw new DataAccessException("already taken");
         }
         users.put(username, user);
+        return user;
     }
 
     @Override
