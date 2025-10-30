@@ -21,7 +21,7 @@ public class AuthServiceTest {
         userDAO.createUser(new UserData("link", "sword", "link@hyrule.com"));
     }
 
-
+    // ------- login() -------
 
     @Test
     public void loginPositiveValidCredentials() throws DataAccessException {
