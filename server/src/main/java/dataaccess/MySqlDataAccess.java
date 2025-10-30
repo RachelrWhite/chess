@@ -89,12 +89,44 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
 
 
     public Collection<GameData> listGames() throws DataAccessException {
-        return List.of();
+        var out = new ArrayList<GameData>();
+        var sql = "SELECT gameID, whiteUsername, blackUsername, gameName, json FROM game";
+        try (var conn = DatabaseManager.getConnection();
+             var ps = conn.prepareStatement(sql);
+             var rs = ps.executeQuery()) {
+            var gson = new Gson();
+            while (rs.next()) {
+                var game = gson.fromJson(rs.getString("json"), chess.ChessGame.class);
+                out.add(new GameData(
+                        rs.getInt("gameID"),
+                        rs.getString("whiteUsername"),
+                        rs.getString("blackUsername"),
+                        rs.getString("gameName"),
+                        game
+                ));
+            }
+            return out;
+        } catch (SQLException e) {
+            throw new DataAccessException("listGames failed: " + e.getMessage());
+        }
     }
 
 
     public void updateGame(GameData updated) throws DataAccessException {
-
+        var gson = new Gson();
+        var json = gson.toJson(updated.game());
+        var sql = """
+        UPDATE game
+        SET whiteUsername = ?, blackUsername = ?, gameName = ?, json = ?
+        WHERE gameID = ?
+    """;
+        int rows = executeUpdate(sql,
+                updated.whiteUsername(),
+                updated.blackUsername(),
+                updated.gameName(),
+                json,
+                updated.gameID());
+        if (rows == 0) throw new DataAccessException("updateGame failed: game not found");
     }
 
 
