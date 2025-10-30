@@ -15,7 +15,7 @@ public class DatabaseManager {
     /*
      * Load the database information for the db.properties file.
      */
-                //loadPropertiesFromResources();
+    //loadPropertiesFromResources();
 
     static {
         try {
@@ -36,7 +36,7 @@ public class DatabaseManager {
         }
     }
 
-       //each DAO could create its own table or you could have one function somewhere that creates them all
+    //each DAO could create its own table or you could have one function somewhere that creates them all
 
     /**
      * Creates the database if it does not already exist.

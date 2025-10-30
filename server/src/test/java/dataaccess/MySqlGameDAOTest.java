@@ -67,6 +67,4 @@ class MySqlGameDAOTest {
         assertNotNull(list);
         assertTrue(list.isEmpty());
     }
-
-
 }
