@@ -21,7 +21,7 @@ public class AuthServiceTest {
         userDAO.createUser(new UserData("link", "sword", "link@hyrule.com"));
     }
 
-    // ------- login() -------
+
 
     @Test
     public void loginPositiveValidCredentials() throws DataAccessException {
@@ -47,7 +47,7 @@ public class AuthServiceTest {
         assertTrue(ex.getMessage().toLowerCase().contains("bad request"));
     }
 
-    // ------- logout() -------
+
 
     @Test
     public void logoutPositiveValidToken() throws DataAccessException {
@@ -73,7 +73,7 @@ public class AuthServiceTest {
         assertTrue(ex.getMessage().toLowerCase().contains("unauthorized"));
     }
 
-    // ------- clear() -------
+
 
     @Test
     public void clearPositiveRemovesAllAuths() throws DataAccessException {

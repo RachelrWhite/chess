@@ -27,7 +27,7 @@ public class GamesServiceTest {
         authDAO.createAuth(new AuthData(userToken, userName));
     }
 
-    // -------- createGame --------
+
 
     @Test
     public void createGamePositiveCreatesAndReturnsId() throws DataAccessException {
@@ -48,7 +48,6 @@ public class GamesServiceTest {
         assertTrue(ex.getMessage().toLowerCase().contains("unauthorized"));
     }
 
-    // -------- listGames --------
 
     @Test
     public void listGamesPositiveReturnsAll() throws DataAccessException {
@@ -70,7 +69,7 @@ public class GamesServiceTest {
         assertTrue(ex.getMessage().toLowerCase().contains("unauthorized"));
     }
 
-    // -------- joinGame --------
+
 
     @Test
     public void joinGamePositiveClaimWhiteWhenEmpty() throws DataAccessException {
