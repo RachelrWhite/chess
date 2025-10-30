@@ -3,6 +3,7 @@ package dataaccess;
 import com.google.gson.Gson;
 //import exception.DataAccessException;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.*;
@@ -11,30 +12,52 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
 public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
-    public MySqlDataAccess() throws DataAccessException {
+
+    public MySqlDataAccess() {
         configureDatabase();
     }
 
     public void clear() throws DataAccessException {
-
+        executeUpdate("DELETE FROM auth");
+        executeUpdate("DELETE FROM game");
+        executeUpdate("DELETE FROM user");
+        //reset game IDs
+        //executeUpdate("ALTER TABLE game AUTO_INCREMENT = 1");
     }
 
 
     public UserData createUser(UserData user) throws DataAccessException {
-        var statement = "INSERT INTO user (username, password, email, json) VALUES (?, ?, ?, ?)";
-        String json = new Gson().toJson(user);
-        int id = executeUpdate(statement, user.username(), user.password(), user.email(), json);
-        return new UserData(user.username(), user.password(), user.email());
+        var hashed = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+        var sql = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
+        executeUpdate(sql, user.username(), hashed, user.email());
+        return new UserData(user.username(), hashed, user.email());
     }
 
 
     public UserData getUser(String username) throws DataAccessException {
-        return null;
+        var sql = "SELECT username, password, email FROM user WHERE username = ?";
+        try (var conn = DatabaseManager.getConnection();
+             var ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            try (var rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new UserData(rs.getString("username"),
+                            rs.getString("password"),
+                            rs.getString("email"));
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("getUser failed: " + e.getMessage());
+        }
     }
 
 
     public int createGame(String gameName) throws DataAccessException {
-        return 0;
+        var game = new chess.ChessGame();
+        var json = new Gson().toJson(game);
+        var sql = "INSERT INTO game (gameName, json) VALUES (?, ?)";
+        return executeUpdate(sql, gameName, json);
     }
 
 
@@ -91,18 +114,10 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
         }
     }
 
-//    private final String[] createStatements = {
-//            """
-//            CREATE TABLE IF NOT EXISTS  user (
-//              `username` VARCHAR(255) PRIMARY KEY,
-//              `password` VARCHAR(255) NOT NULL,
-//              `email` VARCHAR(255)
-//            )
-//            """
-//    };
 
 
-    private void configureDatabase() throws DataAccessException {
+    private void configureDatabase() {
+        System.out.println("This was run");
         try (var conn = DatabaseManager.getConnection()) {
             try (var st = conn.createStatement()) {
                 st.executeUpdate("""
@@ -130,8 +145,8 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
                             )
                         """);
             }
-        } catch (SQLException e) {
-            throw new DataAccessException("unable to configure database: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.print("try catch failed under the configure database function");
         }
     }
 }

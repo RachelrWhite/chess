@@ -19,15 +19,16 @@ public class Server {
     private final UserService user;
     private final GameService game;
     private final AuthService auth;
-    UserDAO userDataAccess = new MemoryUserDAO();
-    AuthDAO authDataAccess = new MemoryAuthDAO();
-    GameDAO gameDataAccess = new MemoryGameDAO();
+    UserDAO userDataAccess;
+    AuthDAO authDataAccess;
+    GameDAO gameDataAccess;
+
 
 
     public Server() {
-        userDataAccess = new MemoryUserDAO();
-        authDataAccess = new MemoryAuthDAO();
-        gameDataAccess = new MemoryGameDAO();
+        userDataAccess = new MySqlDataAccess();
+        authDataAccess = new MySqlDataAccess();
+        gameDataAccess = new MySqlDataAccess();
         user = new UserService(userDataAccess, authDataAccess);
         auth = new AuthService(authDataAccess, userDataAccess);
         game = new GameService(gameDataAccess, authDataAccess);
