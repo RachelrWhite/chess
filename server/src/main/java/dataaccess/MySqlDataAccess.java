@@ -192,7 +192,9 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
                     preparedStatement.setInt(i + 1, p);
                 } else if (param == null) {
                     preparedStatement.setNull(i + 1, NULL);
-                } else preparedStatement.setObject(i + 1, param);
+                } else {
+                    preparedStatement.setObject(i + 1, param);
+                }
             }
 
             int updated = preparedStatement.executeUpdate();

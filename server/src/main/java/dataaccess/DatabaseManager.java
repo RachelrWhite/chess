@@ -74,27 +74,8 @@ public class DatabaseManager {
             throw new DataAccessException("failed to get connection", ex);
         }
     }
+    //they made me get rid of this function but done even worry its in the starter files lol - private static void loadPropertiesFromResources() {
 
-    /*private static void loadPropertiesFromResources() {
-        try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
-            if (propStream == null) {
-                throw new Exception("Unable to load db.properties");
-            }
-            Properties props = new Properties();
-            props.load(propStream);
-            loadProperties(props);
-        } catch (Exception ex) {
-            throw new RuntimeException("unable to process db.properties", ex);
-        }
-    }*/
+    //private static void loadProperties(Properties props) {
 
-    private static void loadProperties(Properties props) {
-        databaseName = props.getProperty("db.name");
-        dbUsername = props.getProperty("db.user");
-        dbPassword = props.getProperty("db.password");
-
-        var host = props.getProperty("db.host");
-        var port = Integer.parseInt(props.getProperty("db.port"));
-        connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
-    }
 }

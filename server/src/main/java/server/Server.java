@@ -270,9 +270,6 @@ public class Server {
     private void clear(Context ctx) throws DataAccessException {
         new Gson().fromJson(ctx.body(), ClearRequest.class);
         ((MySqlDataAccess) userDataAccess).clear();
-//        user.clear();
-//        game.clear();
-//        auth.clear();
         ctx.status(200);
     }
 
