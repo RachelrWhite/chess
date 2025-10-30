@@ -178,6 +178,7 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
         if (rows == 0) {
             throw new DataAccessException("deleteAuth failed: token not found");
         }
+        executeUpdate("DELETE FROM auth WHERE authToken = ?", authToken);
     }
 
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
