@@ -16,7 +16,7 @@ class ChessGameRoundTripTest {
     }
 
     @Test
-    void chessGame_roundTrip_mutationPersists_positive() throws Exception {
+    void chessGameRoundTripMutationPersistsPositive() throws Exception {
         int id = dao.createGame("RoundTrip");
         var g = dao.getGame(id);
         assertNotNull(g);
