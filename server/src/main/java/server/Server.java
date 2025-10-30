@@ -24,7 +24,6 @@ public class Server {
     GameDAO gameDataAccess;
 
 
-
     public Server() {
 //        userDataAccess = new MySqlDataAccess();
 //        authDataAccess = new MySqlDataAccess();
@@ -46,8 +45,14 @@ public class Server {
                 .post("/game", this::createGame)
                 .get("/game", this::listGames)
                 .put("/game", this::joinGame)
-                .delete("/db", this::clear);
+                .delete("/db", this::clear)
+                .exception(DataAccessException.class, (e, ctx) -> {
+                    ctx.status(500)
+                            .contentType("application/json")
+                            .result(new Gson().toJson(Map.of("message", "Error: " + e.getMessage())));
+                });
     }
+
 
     public int run(int desiredPort) {
         javalin.start(desiredPort);
@@ -160,7 +165,7 @@ public class Server {
             ctx.contentType("application/json");
             ctx.result(gson.toJson(new CreateGameResult(id)));
 
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             String m = e.getMessage();
             int status;
             String bodyMessage;
