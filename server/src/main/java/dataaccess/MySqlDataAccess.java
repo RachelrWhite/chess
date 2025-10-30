@@ -89,7 +89,9 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
              var ps = conn.prepareStatement(sql)) {
             ps.setInt(1, gameID);
             try (var rs = ps.executeQuery()) {
-                if (!rs.next()) return null;
+                if (!rs.next()) {
+                    return null;
+                }
                 var gameJson = rs.getString("json");
                 var game = GSON.fromJson(gameJson, chess.ChessGame.class);
                 return new GameData(
@@ -142,7 +144,9 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
                 updated.gameName(),
                 json,
                 updated.gameID());
-        if (rows == 0) throw new DataAccessException("updateGame failed: game not found");
+        if (rows == 0) {
+            throw new DataAccessException("updateGame failed: game not found");
+        }
     }
 
 
@@ -171,7 +175,9 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
 
     public void deleteAuth(String authToken) throws DataAccessException {
         int rows = executeUpdate("DELETE FROM auth WHERE authToken = ?", authToken);
-        if (rows == 0) throw new DataAccessException("deleteAuth failed: token not found");
+        if (rows == 0) {
+            throw new DataAccessException("deleteAuth failed: token not found");
+        }
     }
 
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
@@ -180,10 +186,13 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
 
             for (int i = 0; i < params.length; i++) {
                 Object param = params[i];
-                if (param instanceof String p) preparedStatement.setString(i + 1, p);
-                else if (param instanceof Integer p) preparedStatement.setInt(i + 1, p);
-                else if (param == null) preparedStatement.setNull(i + 1, NULL);
-                else preparedStatement.setObject(i + 1, param);
+                if (param instanceof String p) {
+                    preparedStatement.setString(i + 1, p);
+                } else if (param instanceof Integer p) {
+                    preparedStatement.setInt(i + 1, p);
+                } else if (param == null) {
+                    preparedStatement.setNull(i + 1, NULL);
+                } else preparedStatement.setObject(i + 1, param);
             }
 
             int updated = preparedStatement.executeUpdate();

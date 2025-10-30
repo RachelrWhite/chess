@@ -30,15 +30,6 @@ public class UserService {
         var token = java.util.UUID.randomUUID().toString();
         auth.createAuth(new AuthData(token, registerRequest.username()));
         return new RegisterResult(registerRequest.username(), token);
-//        String u = registerRequest.username();
-//        if (users.getUser(u) == null) {
-//            String token = UUID.randomUUID().toString();
-//            users.createUser(new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email()));
-//            auth.createAuth(new AuthData(token, registerRequest.username()));
-//            return new RegisterResult(u, token);
-//        } else {
-//            throw new DataAccessException("already taken");
-//        }
     }
 
 

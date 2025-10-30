@@ -25,9 +25,6 @@ public class Server {
 
 
     public Server() {
-//        userDataAccess = new MySqlDataAccess();
-//        authDataAccess = new MySqlDataAccess();
-//        gameDataAccess = new MySqlDataAccess();
         var dao = new MySqlDataAccess();
 
         userDataAccess = dao;
