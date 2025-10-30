@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.sql.*;
 import java.util.Properties;
 
+
+
 public class DatabaseManager {
     private static String databaseName;
     private static String dbUsername;

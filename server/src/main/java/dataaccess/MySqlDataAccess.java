@@ -1,6 +1,5 @@
 package dataaccess;
 
-import com.google.gson.Gson;
 //import exception.DataAccessException;
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
@@ -11,9 +10,29 @@ import java.util.*;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
+import chess.piecemoves.MoveCalculator;
+import chess.piecemoves.KingMovesCalculator;
+
+
 public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
+    private static final Gson GSON = new GsonBuilder()
+            .registerTypeAdapter(
+                    MoveCalculator.class,
+                    (InstanceCreator<MoveCalculator>) type -> new KingMovesCalculator()
+            )
+            .create();
+
+
 
     public MySqlDataAccess() {
+        try {
+            DatabaseManager.createDatabase();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
         configureDatabase();
     }
 
@@ -71,9 +90,8 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
             ps.setInt(1, gameID);
             try (var rs = ps.executeQuery()) {
                 if (!rs.next()) return null;
-                var gson = new Gson();
                 var gameJson = rs.getString("json");
-                var game = gson.fromJson(gameJson, chess.ChessGame.class);
+                var game = GSON.fromJson(gameJson, chess.ChessGame.class);
                 return new GameData(
                         rs.getInt("gameID"),
                         rs.getString("whiteUsername"),
@@ -94,9 +112,8 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
         try (var conn = DatabaseManager.getConnection();
              var ps = conn.prepareStatement(sql);
              var rs = ps.executeQuery()) {
-            var gson = new Gson();
             while (rs.next()) {
-                var game = gson.fromJson(rs.getString("json"), chess.ChessGame.class);
+                var game = GSON.fromJson(rs.getString("json"), chess.ChessGame.class);
                 out.add(new GameData(
                         rs.getInt("gameID"),
                         rs.getString("whiteUsername"),
@@ -113,8 +130,7 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
 
 
     public void updateGame(GameData updated) throws DataAccessException {
-        var gson = new Gson();
-        var json = gson.toJson(updated.game());
+        var json = GSON.toJson(updated.game());
         var sql = """
         UPDATE game
         SET whiteUsername = ?, blackUsername = ?, gameName = ?, json = ?
@@ -131,40 +147,55 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
 
 
     public void createAuth(AuthData auth) throws DataAccessException {
-
+        var sql = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
+        executeUpdate(sql, auth.authToken(), auth.username());
     }
 
 
     public AuthData getAuth(String authToken) throws DataAccessException {
-        return null;
+        var sql = "SELECT authToken, username FROM auth WHERE authToken = ?";
+        try (var conn = DatabaseManager.getConnection();
+             var ps = conn.prepareStatement(sql)) {
+            ps.setString(1, authToken);
+            try (var rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new AuthData(rs.getString("authToken"), rs.getString("username"));
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("getAuth failed: " + e.getMessage());
+        }
     }
 
 
     public void deleteAuth(String authToken) throws DataAccessException {
-
+        int rows = executeUpdate("DELETE FROM auth WHERE authToken = ?", authToken);
+        if (rows == 0) throw new DataAccessException("deleteAuth failed: token not found");
     }
 
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
-        try (Connection conn = DatabaseManager.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
-                for (int i = 0; i < params.length; i++) {
-                    Object param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param instanceof UserData p) ps.setString(i + 1, p.toString());
-                    else if (param == null) ps.setNull(i + 1, NULL);
-                }
-                ps.executeUpdate();
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
 
-                ResultSet rs = ps.getGeneratedKeys();
+            for (int i = 0; i < params.length; i++) {
+                Object param = params[i];
+                if (param instanceof String p) preparedStatement.setString(i + 1, p);
+                else if (param instanceof Integer p) preparedStatement.setInt(i + 1, p);
+                else if (param == null) preparedStatement.setNull(i + 1, NULL);
+                else preparedStatement.setObject(i + 1, param);
+            }
+
+            int updated = preparedStatement.executeUpdate();
+
+            try (ResultSet rs = preparedStatement.getGeneratedKeys()) {
                 if (rs.next()) {
                     return rs.getInt(1);
                 }
-
-                return 0;
             }
+            return updated;
         } catch (SQLException e) {
-            throw new DataAccessException("unable to configure database: " + e.getMessage());
+            throw new DataAccessException("unable to execute update: " + e.getMessage(), e);
         }
     }
 
@@ -201,6 +232,7 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
             }
         } catch (Exception e) {
             System.out.print("try catch failed under the configure database function");
+            throw new RuntimeException("configureDatabase failed", e);
         }
     }
 }
