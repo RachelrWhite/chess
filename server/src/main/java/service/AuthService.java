@@ -2,7 +2,7 @@ package service;
 
 import dataaccess.*;
 import model.*;
-
+import org.mindrot.jbcrypt.BCrypt;
 import java.util.UUID;
 
 public class AuthService {
@@ -22,7 +22,7 @@ public class AuthService {
         }
 
         UserData user = users.getUser(loginRequest.username());
-        if (user == null || !user.password().equals(loginRequest.password())) {
+        if (user == null || !BCrypt.checkpw(loginRequest.password(), user.password())) {
             throw new DataAccessException("unauthorized");
         }
 

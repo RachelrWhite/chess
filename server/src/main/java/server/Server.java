@@ -26,9 +26,14 @@ public class Server {
 
 
     public Server() {
-        userDataAccess = new MySqlDataAccess();
-        authDataAccess = new MySqlDataAccess();
-        gameDataAccess = new MySqlDataAccess();
+//        userDataAccess = new MySqlDataAccess();
+//        authDataAccess = new MySqlDataAccess();
+//        gameDataAccess = new MySqlDataAccess();
+        var dao = new MySqlDataAccess();
+
+        userDataAccess = dao;
+        authDataAccess = dao;
+        gameDataAccess = dao;
         user = new UserService(userDataAccess, authDataAccess);
         auth = new AuthService(authDataAccess, userDataAccess);
         game = new GameService(gameDataAccess, authDataAccess);
@@ -262,9 +267,10 @@ public class Server {
 
     private void clear(Context ctx) throws DataAccessException {
         new Gson().fromJson(ctx.body(), ClearRequest.class);
-        user.clear();
-        game.clear();
-        auth.clear();
+        ((MySqlDataAccess) userDataAccess).clear();
+//        user.clear();
+//        game.clear();
+//        auth.clear();
         ctx.status(200);
     }
 

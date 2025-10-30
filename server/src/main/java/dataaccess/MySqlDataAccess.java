@@ -41,7 +41,7 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
         executeUpdate("DELETE FROM game");
         executeUpdate("DELETE FROM user");
         //reset game IDs
-        //executeUpdate("ALTER TABLE game AUTO_INCREMENT = 1");
+        executeUpdate("ALTER TABLE game AUTO_INCREMENT = 1");
     }
 
 
@@ -74,7 +74,7 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
 
     public int createGame(String gameName) throws DataAccessException {
         var game = new chess.ChessGame();
-        var json = new Gson().toJson(game);
+        var json = GSON.toJson(game);
         var sql = "INSERT INTO game (gameName, json) VALUES (?, ?)";
         return executeUpdate(sql, gameName, json);
     }
