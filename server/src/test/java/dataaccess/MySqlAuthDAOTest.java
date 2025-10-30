@@ -54,4 +54,10 @@ class MySqlAuthDAOTest {
         // Second insert uses same token -> PK/unique violation, should throw
         assertThrows(DataAccessException.class, () -> dao.createAuth(new AuthData("dup", "pam")));
     }
+    @Test
+    void createAuthForUnknownUserThrows() {
+        assertThrows(DataAccessException.class,
+                () -> dao.createAuth(new AuthData("tkn-ghost", "ghost")));
+    }
+
 }

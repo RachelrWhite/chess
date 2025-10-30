@@ -61,4 +61,12 @@ class MySqlGameDAOTest {
     void createNullNameThrows() {
         assertThrows(DataAccessException.class, () -> dao.createGame(null)); // NOT NULL column
     }
+    @Test
+    void listGamesEmptyReturnsEmpty() throws Exception {
+        var list = dao.listGames();
+        assertNotNull(list);
+        assertTrue(list.isEmpty());
+    }
+
+
 }
