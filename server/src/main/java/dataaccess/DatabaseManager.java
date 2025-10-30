@@ -1,5 +1,7 @@
 package dataaccess;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.InputStream;
 import java.sql.*;
 import java.util.Properties;
@@ -15,7 +17,7 @@ public class DatabaseManager {
     /*
      * Load the database information for the db.properties file.
      */
-    //loadPropertiesFromResources();
+
 
     static {
         try {
@@ -75,6 +77,7 @@ public class DatabaseManager {
         }
     }
 
+    @SuppressWarnings("unused")
     private static void loadPropertiesFromResources() {
         try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
             if (propStream == null) {
@@ -88,7 +91,7 @@ public class DatabaseManager {
         }
     }
 
-    private static void loadProperties(Properties props) {
+    private static void loadProperties(@NotNull Properties props) {
         databaseName = props.getProperty("db.name");
         dbUsername = props.getProperty("db.user");
         dbPassword = props.getProperty("db.password");
