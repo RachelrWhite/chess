@@ -1,11 +1,18 @@
 import chess.*;
+import ui.Repl;
 
 public class Main {
     public static void main(String[] args) {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         //System.out.println("♕ Welcome to Chess. Sign in to start. ♕ " + piece);
         System.out.println("♕ Welcome to Chess. Sign in to start. ♕ ");
-        //all this stuff is going to be in the help command - for now it is just in here cause we ball
+        var serverUrl = "http://localhost:8080";
+        if (args.length == 1) {
+            serverUrl = args[0];
+        }
+
+        new Repl(serverUrl).run();
+        //all this stuff is going to be in the help command - for now it is just in here
         System.out.println("Options: ");
         System.out.println("Login as an existing user: \"l\", \"login\" <USERNAME> <PASSWORD>");
         System.out.println("Register a new user: \"r\", \'register\" <USERNAME> <PASSWORD> <EMAIL>");
