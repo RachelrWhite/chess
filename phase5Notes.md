@@ -143,3 +143,23 @@ Commit history (12+ meaningful commits spread out)
 8. No New Pass Off Tests
 
 There are no new autograder tests for Phase 5 — but your client and facade tests must pass locally before you demo to a TA.
+
+
+
+
+//take all the input and sent it to the prelogin or postlogin
+
+    //make sure the post can access the authtoken - can store in reple
+    //last tips:
+    //how do i plan on sending the https requests:
+        //3 different mods client, shared, server
+        //my server can access the server code and shared
+        //client can access the shared and client code
+        //client goes through the cloud to access server code
+
+
+    //add server facade in the java folder probably in its own folder
+
+
+
+}

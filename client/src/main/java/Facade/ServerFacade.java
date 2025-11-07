@@ -1,6 +1,7 @@
+package Facade;
+
 import com.google.gson.Gson;
-import Exception.ResponseException;
-import model.*;
+//import Exception.ResponseException;
 
 import java.net.*;
 import java.net.http.*;
@@ -19,6 +20,8 @@ public class ServerFacade {
 
     //this is where they called the public Pet addPet(pet pet) throws ResponceException
     //public listPets()
+    //need to make these for all the different endpoints
+
 
     private HttpRequest buildRequest(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
@@ -29,6 +32,7 @@ public class ServerFacade {
         }
         return request.build();
     }
+
     private BodyPublisher makeRequestBody(Object request) {
         if (request != null) {
             return BodyPublishers.ofString(new Gson().toJson(request));
@@ -37,23 +41,27 @@ public class ServerFacade {
         }
     }
 
-    private HttpResponse<String> sendRequest(HttpRequest request) throws ResponseException {
+    private HttpResponse<String> sendRequest(HttpRequest request) {
         try {
             return client.send(request, BodyHandlers.ofString());
         } catch (Exception ex) {
-            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+            System.out.print("we freaked ServerFacade");
+//            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+            return null;
         }
     }
 
-    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass)  {
         var status = response.statusCode();
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body != null) {
-                throw ResponseException.fromJson(body);
+//                throw ResponseException.fromJson(body);
+                System.out.print("we freaked ServerFacade2");
             }
 
-            throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
+            System.out.print("we freaked ServerFacade3");
+            //throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
         }
 
         if (responseClass != null) {

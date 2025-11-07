@@ -1,5 +1,5 @@
 import chess.*;
-import ui.Repl;
+import ui.PreloginClient;
 
 public class Main {
     public static void main(String[] args) {
@@ -12,7 +12,7 @@ public class Main {
         }
 
         try {
-            new Repl(serverUrl).run();
+            new PreloginClient(serverUrl).run();
 
         } catch (Throwable ex) {
             System.out.printf("Unable to start server: %s%n", ex.getMessage());
