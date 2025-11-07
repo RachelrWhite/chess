@@ -6,27 +6,25 @@ public class Main {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         //System.out.println("♕ Welcome to Chess. Sign in to start. ♕ " + piece);
         System.out.println("♕ Welcome to Chess. Sign in to start. ♕ ");
-        var serverUrl = "http://localhost:8080";
+        String serverUrl = "http://localhost:8080";
         if (args.length == 1) {
             serverUrl = args[0];
         }
 
-        new Repl(serverUrl).run();
-        //all this stuff is going to be in the help command - for now it is just in here
-        System.out.println("Options: ");
-        System.out.println("Login as an existing user: \"l\", \"login\" <USERNAME> <PASSWORD>");
-        System.out.println("Register a new user: \"r\", \'register\" <USERNAME> <PASSWORD> <EMAIL>");
-        System.out.println("Exit the program: \"q\", \"quit\"");
-        System.out.println("Print this message: \"h\", \"help\"");
-    }
+        try {
+            new Repl(serverUrl).run();
 
-//    public String helo(String... params) throws ResponseException {
-//        if (params.length >= 1) {
-//            state = State.SIGNEDIN;
-//            visitorName = String.join("-", params);
-//            ws.enterPetShop(visitorName);
-//            return String.format("You signed in as %s.", visitorName);
-//        }
-//        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <yourname>");
-//    }
+        } catch (Throwable ex) {
+            System.out.printf("Unable to start server: %s%n", ex.getMessage());
+
+        }
+    }
 }
+
+
+////all this stuff is going to be in the help command - for now it is just in here
+//            System.out.println("Options: ");
+//            System.out.println("Login as an existing user: \"l\", \"login\" <USERNAME> <PASSWORD>");
+//            System.out.println("Register a new user: \"r\", \"register\" <USERNAME> <PASSWORD> <EMAIL>");
+//            System.out.println("Exit the program: \"q\", \"quit\"");
+//            System.out.println("Print this message: \"h\", \"help\"");

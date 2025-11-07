@@ -1,6 +1,7 @@
 package dataaccess;
 
 //import exception.DataAccessException;
+
 import model.*;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -24,7 +25,6 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
                     (InstanceCreator<MoveCalculator>) type -> new KingMovesCalculator()
             )
             .create();
-
 
 
     public MySqlDataAccess() {
@@ -82,9 +82,9 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
 
     public GameData getGame(int gameID) throws DataAccessException {
         var sql = """
-        SELECT gameID, whiteUsername, blackUsername, gameName, json
-        FROM game WHERE gameID = ?
-    """;
+                    SELECT gameID, whiteUsername, blackUsername, gameName, json
+                    FROM game WHERE gameID = ?
+                """;
         try (var conn = DatabaseManager.getConnection();
              var ps = conn.prepareStatement(sql)) {
             ps.setInt(1, gameID);
@@ -134,10 +134,10 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
     public void updateGame(GameData updated) throws DataAccessException {
         var json = GSON.toJson(updated.game());
         var sql = """
-        UPDATE game
-        SET whiteUsername = ?, blackUsername = ?, gameName = ?, json = ?
-        WHERE gameID = ?
-    """;
+                    UPDATE game
+                    SET whiteUsername = ?, blackUsername = ?, gameName = ?, json = ?
+                    WHERE gameID = ?
+                """;
         int rows = executeUpdate(sql,
                 updated.whiteUsername(),
                 updated.blackUsername(),
@@ -210,7 +210,6 @@ public class MySqlDataAccess implements AuthDAO, GameDAO, UserDAO {
             throw new DataAccessException("unable to execute update: " + e.getMessage(), e);
         }
     }
-
 
 
     private void configureDatabase() {
