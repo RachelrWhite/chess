@@ -23,6 +23,26 @@ public class ServerFacade {
     //need to make these for all the different endpoints
 
 
+    // I think this is where all of my endpoints are going to go
+
+    //we can start witht eh logout method (this could be super useful
+
+    public void logout(String authToken) {
+        System.out.println("(Stub) logging out with token " + authToken);
+
+//        var request = HttpRequest.newBuilder()
+//                .uri(URI.create(baseUrl + "/session"))
+//                .header("Authorization", authToken)
+//                .DELETE()
+//                .build();
+//
+//        var respose = client.send(request, BodyHandlers.ofString());
+//        if (response.statusCode() != 200) {
+//
+//            throw new Exception("Logout failed: " + response.statusCode());
+//        }
+    }
+
     private HttpRequest buildRequest(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))

@@ -78,14 +78,22 @@ public class PreloginClient {
             return "usage: register <USERNAME> <PASSWORD> <EMAIL>";
         }
         // call server.register later; for now just stub a message:
-        return "Registered & logged in as " + params[0];
+        System.out.println("Registered & logged in as " + params[0]);
+        //if sucessful register {
+            var session = new Session(params[0], /*authtoken from facade later*/ "token");
+            new PostloginClient(server, session).run();
+        return "";
     }
 
     public String login(String... params) {
         if (params.length < 2) {
             return "usage: login <USERNAME> <PASSWORD>";
         }
-        return "Logged in as " + params[0];
+        System.out.println("Logged in as " + params[0]);
+        // if sucessful login {
+            var session = new Session(params[0], /*authtoken from facade later*/ "token");
+            new PostloginClient(server, session).run();
+        return "";
     }
 
     public String help() {
