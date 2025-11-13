@@ -1,6 +1,8 @@
 package Facade;
 
 import com.google.gson.Gson;
+import model.AuthData;
+import model.GameData;
 //import Exception.ResponseException;
 
 import java.net.*;
@@ -8,6 +10,7 @@ import java.net.http.*;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.List;
 
 
 public class ServerFacade {
@@ -23,34 +26,119 @@ public class ServerFacade {
     //need to make these for all the different endpoints
 
 
-    // I think this is where all of my endpoints are going to go
-
-    //we can start witht eh logout method (this could be super useful
-
-    public void logout(String authToken) {
-        System.out.println("(Stub) logging out with token " + authToken);
-
-//        var request = HttpRequest.newBuilder()
-//                .uri(URI.create(baseUrl + "/session"))
-//                .header("Authorization", authToken)
-//                .DELETE()
-//                .build();
-//
-//        var respose = client.send(request, BodyHandlers.ofString());
-//        if (response.statusCode() != 200) {
-//
-//            throw new Exception("Logout failed: " + response.statusCode());
-//        }
+    // end points
+    //we can start with the logout method (this could be super useful
+    public AuthData register(String username, String password, String email) {
+        var req  = buildRequest("POST", "/user", new RegisterRequest(username, password, email), null);
+        var resp = sendRequest(req);
+        if (resp == null) return null; // TEMP: compile/run now; refine later
+        var out  = handleResponse(resp, AuthRes.class); // 200 => {username, authToken}
+        return (out == null) ? null : new AuthData(out.authToken, out.username);
     }
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
-        var request = HttpRequest.newBuilder()
+    public AuthData login(String username, String password) {
+        var req  = buildRequest("POST", "/session", new LoginRequest(username, password), null);
+        var resp = sendRequest(req);
+        if (resp == null) return null;
+        var out  = handleResponse(resp, AuthRes.class); // 200 => {username, authToken}
+        return (out == null) ? null : new AuthData(out.authToken, out.username);
+    }
+
+    public void logout(String authToken) {
+        var req  = buildRequest("DELETE", "/session", null, authToken);
+        var resp = sendRequest(req);
+        if (resp == null) return;        // TEMP
+        handleResponse(resp, null);
+    }
+
+
+    public java.util.List<GameData> listGames(String authToken) {
+        var req  = buildRequest("GET", "/game", null, authToken);
+        var resp = sendRequest(req);
+        if (resp == null) return java.util.List.of();
+        var out  = handleResponse(resp, GamesListWrapper.class); // 200 => { games: [...] }
+        return (out == null || out.games == null) ? java.util.List.of() : out.games;
+    }
+
+    public int createGame(String authToken, String gameName) {
+        var req  = buildRequest("POST", "/game", new CreateGameRequest(gameName), authToken);
+        var resp = sendRequest(req);
+        if (resp == null) return 0;
+        var out  = handleResponse(resp, CreateGameResult.class); // 200 => { gameID: n }
+        return (out == null) ? 0 : out.gameID;
+    }
+
+    public void joinGame(String authToken, String playerColor, int gameID) {
+        var request  = buildRequest("PUT", "/game", new JoinGameRequest(playerColor, gameID), authToken);
+        var resp = sendRequest(request);
+        if (resp == null) return;
+        handleResponse(resp, null);
+    }
+
+    //this is for testing - dont really need for the project but can take out if redundant
+    public void clear() {
+        var req  = buildRequest("DELETE", "/db", null, null);
+        var resp = sendRequest(req);
+        if (resp == null) return;
+        handleResponse(resp, null); // 200 => {}
+    }
+
+
+    private static class GamesListWrapper {
+
+        List<GameData> games;
+    }
+
+    private static class ErrorMsg { String message; }
+
+    private static class RegisterRequest {
+        String username, password, email;
+        RegisterRequest(String u, String p, String e) { username=u; password=p; email=e; }
+    }
+    private static class LoginRequest {
+        String username, password;
+        LoginRequest(String u, String p) { username=u; password=p; }
+    }
+    private static class AuthRes {
+        String username, authToken;
+    }
+
+    private static class CreateGameRequest {
+        String gameName;
+        CreateGameRequest(String n) { gameName=n; }
+    }
+    private static class CreateGameResult { int gameID; }
+
+    private static class JoinGameRequest {
+        String playerColor; int gameID;
+        JoinGameRequest(String c, int id) { playerColor=c; gameID=id; }
+    }
+
+    //private static class GamesListWrapper { java.util.List<GameData> games; }
+
+
+
+    private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
+//        var request = HttpRequest.newBuilder()
+//                .uri(URI.create(serverUrl + path))
+//                .method(method, makeRequestBody(body));
+//        if (body != null) {
+//            request.setHeader("Content-Type", "application/json");
+//        }
+//        return request.build();
+        var builder = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));
+
         if (body != null) {
-            request.setHeader("Content-Type", "application/json");
+            builder.header("Content-Type", "application/json");
         }
-        return request.build();
+        if (authToken != null && !authToken.isBlank()) {
+            builder.header("Authorization", authToken);
+        }
+
+        return builder.build();
+
     }
 
     private BodyPublisher makeRequestBody(Object request) {
