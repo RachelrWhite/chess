@@ -1,21 +1,30 @@
 package client;
 
+import chess.*;
 import Facade.ServerFacade;
 import model.AuthData;
 import model.GameData;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
+import server.Server;
 
 public class phase5tests {
+    static Server server;
     static ServerFacade facade;
 
     @BeforeAll
-    static void setup() {
-        facade = new ServerFacade("http://localhost:8080");
+    static void startServer() {
+        server = new Server();
+
+        // Prefer a random free port; Server.run(int) should return the actual port used.
+        int port = server.run(0);                 // if your run(...) takes a port
+        facade = new ServerFacade("http://localhost:" + port);
     }
 
+    @AfterAll
+    static void stopServer() {
+        server.stop();
+    }
 
     //might not need but just in case
     @BeforeEach

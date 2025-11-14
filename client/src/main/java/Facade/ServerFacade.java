@@ -140,7 +140,7 @@ public class ServerFacade {
         try {
             return client.send(request, BodyHandlers.ofString());
         } catch (Exception ex) {
-            System.out.print("we freaked ServerFacade");
+            System.out.print("Http Response ServerFacade - sendRequest");
 //            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
             return null;
         }
