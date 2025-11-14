@@ -12,14 +12,18 @@ public class BoardDrawer {
         if (whitePerspective) {
             for (int r=7;r>=0;r--){
                 sb.append(r+1).append(' ');
-                for (int c=0;c<8;c++) sb.append(symbol(board[r][c])).append(' ');
+                for (int c=0;c<8;c++) {
+                    sb.append(symbol(board[r][c])).append(' ');
+                }
                 sb.append(r+1).append('\n');
             }
             sb.append(files);
         } else {
             for (int r=0;r<8;r++){
                 sb.append(r+1).append(' ');
-                for (int c=7;c>=0;c--) sb.append(symbol(board[r][c])).append(' ');
+                for (int c=7;c>=0;c--){
+                    sb.append(symbol(board[r][c])).append(' ');
+                }
                 sb.append(r+1).append('\n');
             }
             sb.append("  h g f e d c b a");

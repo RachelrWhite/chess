@@ -1,6 +1,6 @@
 package ui;
 
-import Facade.ServerFacade;
+import facade.ServerFacade;
 import model.GameData;
 
 import java.util.*;
@@ -95,9 +95,6 @@ public class PostloginClient {
             return "No games created yet. Create one with: create game <name>";
         }
         lastListed = games;
-//        if (lastListed.isEmpty()) {
-//            return "No games created yet. Create one with: create game <name>";
-//        }
         var sb = new StringBuilder("Games:\n");
 
         for (int i = 0; i < lastListed.size(); i++) {
@@ -124,7 +121,9 @@ public class PostloginClient {
         }
 
         String color = (params.length >= 2) ? params[1].toUpperCase() : "WHITE";
-        if (!color.equals("WHITE") && !color.equals("BLACK")) return "Color must be WHITE or BLACK.";
+        if (!color.equals("WHITE") && !color.equals("BLACK")) {
+            return "Color must be WHITE or BLACK.";
+        }
 
         var chosen = lastListed.get(numChosen - 1);
         server.joinGame(session.authToken(), color, chosen.gameID());

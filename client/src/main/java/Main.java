@@ -20,11 +20,3 @@ public class Main {
         }
     }
 }
-
-
-////all this stuff is going to be in the help command - for now it is just in here
-//            System.out.println("Options: ");
-//            System.out.println("Login as an existing user: \"l\", \"login\" <USERNAME> <PASSWORD>");
-//            System.out.println("Register a new user: \"r\", \"register\" <USERNAME> <PASSWORD> <EMAIL>");
-//            System.out.println("Exit the program: \"q\", \"quit\"");
-//            System.out.println("Print this message: \"h\", \"help\"");

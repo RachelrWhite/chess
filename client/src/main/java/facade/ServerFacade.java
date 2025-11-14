@@ -1,4 +1,4 @@
-package Facade;
+package facade;
 
 import com.google.gson.Gson;
 import model.AuthData;
@@ -25,7 +25,9 @@ public class ServerFacade {
     public AuthData register(String username, String password, String email) {
         var req  = buildRequest("POST", "/user", new RegisterRequest(username, password, email), null);
         var resp = sendRequest(req);
-        if (resp == null) return null; // TEMP: compile/run now; refine later
+        if (resp == null) {
+            return null;
+        }
         var out  = handleResponse(resp, AuthRes.class); // 200 => {username, authToken}
         return (out == null) ? null : new AuthData(out.authToken, out.username);
     }
@@ -33,7 +35,9 @@ public class ServerFacade {
     public AuthData login(String username, String password) {
         var req  = buildRequest("POST", "/session", new LoginRequest(username, password), null);
         var resp = sendRequest(req);
-        if (resp == null) return null;
+        if (resp == null) {
+            return null;
+        }
         var out  = handleResponse(resp, AuthRes.class); // 200 => {username, authToken}
         return (out == null) ? null : new AuthData(out.authToken, out.username);
     }
@@ -41,14 +45,18 @@ public class ServerFacade {
     public void logout(String authToken) {
         var req  = buildRequest("DELETE", "/session", null, authToken);
         var resp = sendRequest(req);
-        if (resp == null) return;        // TEMP
+        if (resp == null) {
+            return;        // TEMP
+        }
         handleResponse(resp, null);
     }
 
     public java.util.List<GameData> listGames(String authToken) {
         var req  = buildRequest("GET", "/game", null, authToken);
         var resp = sendRequest(req);
-        if (resp == null) return java.util.List.of();
+        if (resp == null) {
+            return java.util.List.of();
+        }
         var out  = handleResponse(resp, GamesListWrapper.class); // 200 => { games: [...] }
         return (out == null || out.games == null) ? java.util.List.of() : out.games;
     }
@@ -56,7 +64,9 @@ public class ServerFacade {
     public int createGame(String authToken, String gameName) {
         var req  = buildRequest("POST", "/game", new CreateGameRequest(gameName), authToken);
         var resp = sendRequest(req);
-        if (resp == null) return 0;
+        if (resp == null) {
+            return 0;
+        }
         var out  = handleResponse(resp, CreateGameResult.class); // 200 => { gameID: n }
         return (out == null) ? 0 : out.gameID;
     }
@@ -64,7 +74,9 @@ public class ServerFacade {
     public void joinGame(String authToken, String playerColor, int gameID) {
         var request  = buildRequest("PUT", "/game", new JoinGameRequest(playerColor, gameID), authToken);
         var resp = sendRequest(request);
-        if (resp == null) return;
+        if (resp == null) {
+            return;
+        }
         handleResponse(resp, null);
     }
 
@@ -72,7 +84,9 @@ public class ServerFacade {
     public void clear() {
         var req  = buildRequest("DELETE", "/db", null, null);
         var resp = sendRequest(req);
-        if (resp == null) return;
+        if (resp == null) {
+            return;
+        }
         handleResponse(resp, null); // 200 => {}
     }
 
@@ -106,13 +120,6 @@ public class ServerFacade {
     }
 
     private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
-//        var request = HttpRequest.newBuilder()
-//                .uri(URI.create(serverUrl + path))
-//                .method(method, makeRequestBody(body));
-//        if (body != null) {
-//            request.setHeader("Content-Type", "application/json");
-//        }
-//        return request.build();
         var builder = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));

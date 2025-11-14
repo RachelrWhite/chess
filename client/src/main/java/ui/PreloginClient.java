@@ -4,15 +4,8 @@ package ui;
 import java.util.Arrays;
 import java.util.Scanner;
 
-import com.google.gson.Gson;
-import model.*;
 //import Exception.ResponseException;
-import Facade.ServerFacade;
-//import client.websocket.NotificationHandler;
-//import client.websocket.WebSocketFacade;
-//import webSocketMessages.Notification;
-
-import static ui.EscapeSequences.*;
+import facade.ServerFacade;
 
 
 public class PreloginClient {
@@ -48,15 +41,6 @@ public class PreloginClient {
         System.out.println();
     }
 
-//    public String signIn(String... params) throws ResponseException {
-//        if (params.length >= 1) {
-//            state = State.SIGNEDIN;
-//            visitorName = String.join("-", params);
-//            ws.enterPetShop(visitorName);
-//            return String.format("You signed in as %s.", visitorName);
-//        }
-//        throw new ResponseException(ResponseException.Code.ClientError, "Expected: <yourname>");
-//    }
 
     public String eval(String input) {
         String[] tokens = input.trim().toLowerCase().split("\\s+");

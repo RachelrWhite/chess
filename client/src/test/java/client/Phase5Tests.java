@@ -1,14 +1,13 @@
 package client;
 
-import chess.*;
-import Facade.ServerFacade;
+import facade.ServerFacade;
 import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import server.Server;
 
-public class phase5tests {
+public class Phase5Tests {
     static Server server;
     static ServerFacade facade;
 
