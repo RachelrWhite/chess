@@ -79,7 +79,7 @@ public class PreloginClient {
         }
         // call server.register later; for now just stub a message:
         System.out.println("Registered & logged in as " + params[0]);
-        //if sucessful register {
+        //if successful register {
             var auth = server.register(params[0], params[1], params[2]);
             //var session = new Session(params[0], /*authtoken from facade later*/ "token");
             new PostloginClient(server, new Session(auth.username(), auth.authToken())).run();
@@ -91,7 +91,7 @@ public class PreloginClient {
             return "usage: login <USERNAME> <PASSWORD>";
         }
         System.out.println("Logged in as " + params[0]);
-        // if sucessful login {
+        // if successful login {
             var auth = server.login(params[0], params[1]);
             var session = new Session(params[0], /*authtoken from facade later*/ "token");
             new PostloginClient(server, new Session(auth.username(), auth.authToken())).run();
@@ -99,12 +99,6 @@ public class PreloginClient {
     }
 
     public String help() {
-//        if (state == State.SIGNEDOUT) {
-//            return """
-//                    - signIn <yourname>
-//                    - quit
-//                    """;
-//        }
         return """
                 - Options:
                 - Login as an existing user "l", "login" <USERNAME> <PASSWORD>
