@@ -21,7 +21,7 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    //this is where they called the public Pet addPet(pet pet) throws ResponceException
+    //this is where they called the public Pet addPet(pet pet) throws ResponseException
     //public listPets()
     //need to make these for all the different endpoints
 
@@ -50,7 +50,6 @@ public class ServerFacade {
         if (resp == null) return;        // TEMP
         handleResponse(resp, null);
     }
-
 
     public java.util.List<GameData> listGames(String authToken) {
         var req  = buildRequest("GET", "/game", null, authToken);

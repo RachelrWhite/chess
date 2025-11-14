@@ -74,35 +74,71 @@ public class PostloginClient {
     }
 
     private String createGame(String[] params) {
-        if (params.length < 2 || "game".equalsIgnoreCase(params[0])) {
-            return "usage: create game <gameName";
+        if (params.length < 2 || !"game".equalsIgnoreCase(params[0])) {
+            return "usage: create <gameName>";
         }
         String gameName = String.join(" ", Arrays.copyOfRange(params, 1, params.length));
         // eventually we are going to create server.createGame(session.authToken(), gameName);
-        return "Created game: " + gameName + " (stub)";
+        return "Created game: " + gameName;
     }
 
     private String listGames(String[] params) {
         if (params.length > 0 && !"games".equalsIgnoreCase(params[0])) {
             return "usage: list games";
         }
+        var games = server.listGames(session.authToken());
+        if (games == null) {
+            lastListed = List.of();
+        } else {
+            lastListed = games;
+        }
+        if (lastListed.isEmpty()) {
+            return "No games created yet. Create one with: create game <name>";
+        }
+        var sb = new StringBuilder("Games:\n");
+
+        for (int i = 0; i < lastListed.size(); i++) {
+            var g = lastListed.get(i);
+            String white = Objects.toString(g.whiteUsername(), "-");
+            String black = Objects.toString(g.blackUsername(), "-");
+            sb.append(String.format("  %d) %s  [white=%s | black=%s]%n",
+                    i + 1, g.gameName(), white, black));
+        }
+
+        return sb.toString();
         //later: server.createGame(session.authToken(), gameName);
-        return "No games yet. (stub)";
     }
 
     private String playGame(String[] params) {
-        if (params.length < 2 || !"game".equalsIgnoreCase(params[0])) {
+        if (params.length < 1 || !"game".equalsIgnoreCase(params[0])) {
             return "usage: play game <#fromList> [WHITE|BLACK]";
         }
+        int numChosen;
+        try {
+            numChosen = Integer.parseInt(params[0]);
+        } catch (Exception e) {
+            return "Choose a number from the 'list'.";
+        }
+
+        String color = (params.length >= 2) ? params[1].toUpperCase() : "WHITE";
+        if (!color.equals("WHITE") && !color.equals("BLACK")) return "Color must be WHITE or BLACK.";
+
+        var chosen = lastListed.get(numChosen - 1);
+        server.joinGame(session.authToken(), color, chosen.gameID());
+
+        boolean whitePerspective = !"BLACK".equals(color);
+        System.out.println(BoardDrawer.drawInitial(whitePerspective)); // see tiny helper below
+        return "Joined '" + chosen.gameName() + "' as " + color + ".";
         // later: parse number/color, join, draw board
-        return "Playing game (stub)";
     }
+
 
     private String observeGame(String[] params) {
         if (params.length < 2 || !"game".equalsIgnoreCase(params[0])) {
             return "usage: observe game <#fromList>";
         }
         // later: draw board from white perspective
+
         return "Observing game (stub)";
     }
 
@@ -118,7 +154,7 @@ public class PostloginClient {
                 - create game <gameName>
                 - list games
                 - play game <#fromList> [WHITE|BLACK]
-                - observe game <#fromList>
+                - observe game<#fromList>
                 - logout
                 - help
                 """;
