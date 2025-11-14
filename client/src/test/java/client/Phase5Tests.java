@@ -113,7 +113,7 @@ public class Phase5Tests {
     }
     @Test
     void createGameNegative() {
-        int id = facade.createGame("bad-token", "Should Fail");
+        int id = facade.createGame("bad-token", "Should Fail lol");
         assertEquals(0, id);
     }
     @Test
@@ -132,13 +132,15 @@ public class Phase5Tests {
         var game = games.stream().filter(g -> g.gameID() == id).findFirst().orElseThrow();
         assertEquals("joiner", game.whiteUsername());
     }
+
+
     @Test
     void joinGameNegative() {
         var auth = facade.register("host", "pw", "host@e.com");
         int id = facade.createGame(auth.authToken(), "Open Table");
         assertTrue(id > 0);
 
-        // attempt to join with a bad token → should not change seats
+        // try to join with a bad token - pray this doesn't work
         assertDoesNotThrow(() -> facade.joinGame("bad-token", "BLACK", id));
 
         var games = facade.listGames(auth.authToken());

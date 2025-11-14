@@ -3,7 +3,6 @@ package facade;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
-//import Exception.ResponseException;
 
 import java.net.*;
 import java.net.http.*;
@@ -28,7 +27,7 @@ public class ServerFacade {
         if (resp == null) {
             return null;
         }
-        var out  = handleResponse(resp, AuthRes.class); // 200 => {username, authToken}
+        var out  = handleResponse(resp, AuthRes.class);
         return (out == null) ? null : new AuthData(out.authToken, out.username);
     }
 
@@ -38,7 +37,7 @@ public class ServerFacade {
         if (resp == null) {
             return null;
         }
-        var out  = handleResponse(resp, AuthRes.class); // 200 => {username, authToken}
+        var out  = handleResponse(resp, AuthRes.class);
         return (out == null) ? null : new AuthData(out.authToken, out.username);
     }
 
@@ -57,7 +56,7 @@ public class ServerFacade {
         if (resp == null) {
             return java.util.List.of();
         }
-        var out  = handleResponse(resp, GamesListWrapper.class); // 200 => { games: [...] }
+        var out  = handleResponse(resp, GamesListWrapper.class);
         return (out == null || out.games == null) ? java.util.List.of() : out.games;
     }
 
@@ -67,7 +66,7 @@ public class ServerFacade {
         if (resp == null) {
             return 0;
         }
-        var out  = handleResponse(resp, CreateGameResult.class); // 200 => { gameID: n }
+        var out  = handleResponse(resp, CreateGameResult.class);
         return (out == null) ? 0 : out.gameID;
     }
 
@@ -87,7 +86,7 @@ public class ServerFacade {
         if (resp == null) {
             return;
         }
-        handleResponse(resp, null); // 200 => {}
+        handleResponse(resp, null);
     }
 
     //other functions - mostly from petShop

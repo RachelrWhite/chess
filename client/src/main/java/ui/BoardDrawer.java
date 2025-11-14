@@ -52,12 +52,12 @@ public class BoardDrawer {
     private static String drawBoard(String[][] board, boolean whitePerspective) {
         StringBuilder sb = new StringBuilder();
 
-        String[] filesWhite = {"a","b","c","d","e","f","g","h"};
+        String[] filesWhite = {"a ","b ","c","d ","e ","f","g ","h"};
         String[] filesBlack = {"h","g","f","e","d","c","b","a"};
         String[] files = whitePerspective ? filesWhite : filesBlack;
 
         // Top file labels
-        sb.append("    ");
+        sb.append("   ");
         for (String f : files) {
             sb.append(' ').append(f).append(' ');
         }
@@ -86,7 +86,7 @@ public class BoardDrawer {
         }
 
         // Bottom file labels
-        sb.append("    ");
+        sb.append("   ");
         for (String f : files) {
             sb.append(' ').append(f).append(' ');
         }

@@ -4,15 +4,12 @@ package ui;
 import java.util.Arrays;
 import java.util.Scanner;
 
-//import Exception.ResponseException;
 import facade.ServerFacade;
 
 
 public class PreloginClient {
     private String userName = null;
     private final ServerFacade server;
-    //private final WebSocketFacade ws;
-    //private State state = State.SIGNEDOUT;
 
     public PreloginClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -61,7 +58,6 @@ public class PreloginClient {
         if (params.length < 3) {
             return "usage: register <USERNAME> <PASSWORD> <EMAIL>";
         }
-        // call server.register later; for now just stub a message:
         var auth = server.register(params[0], params[1], params[2]);
         if (auth == null) {
             return "Error: could not register (username may already be taken).";
@@ -86,11 +82,12 @@ public class PreloginClient {
 
         System.out.println("Logged in as " + auth.username());
 
-        // Enter postlogin with the real token
+        // Enter postlogin with the token!!!!!
         var session = new Session(auth.username(), auth.authToken());
         new PostloginClient(server, session).run();
 
         // After postlogin returns, just drop back to prelogin loop
+        //if you are feeling crazy you could reprint help here but i think it's fine
         return "";
     }
 
