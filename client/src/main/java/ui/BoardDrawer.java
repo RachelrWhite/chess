@@ -5,7 +5,6 @@ public class BoardDrawer {
 
     public static String drawInitial(boolean whitePerspective) {
         char[][] board = new char[8][8];
-        // Puts the pieces down with simple letters
         String back = "rnbqkbnr";
         for (int c=0;c<8;c++){ board[0][c]=back.charAt(c); board[1][c]='p'; board[6][c]='P'; board[7][c]=Character.toUpperCase(back.charAt(c)); }
         StringBuilder sb = new StringBuilder();

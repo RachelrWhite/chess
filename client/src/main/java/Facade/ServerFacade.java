@@ -21,13 +21,7 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    //this is where they called the public Pet addPet(pet pet) throws ResponseException
-    //public listPets()
-    //need to make these for all the different endpoints
-
-
     // end points
-    //we can start with the logout method (this could be super useful
     public AuthData register(String username, String password, String email) {
         var req  = buildRequest("POST", "/user", new RegisterRequest(username, password, email), null);
         var resp = sendRequest(req);
@@ -74,7 +68,7 @@ public class ServerFacade {
         handleResponse(resp, null);
     }
 
-    //this is for testing - dont really need for the project but can take out if redundant
+    //this is for testing - don't really need for the project but can take out if redundant
     public void clear() {
         var req  = buildRequest("DELETE", "/db", null, null);
         var resp = sendRequest(req);
@@ -82,7 +76,7 @@ public class ServerFacade {
         handleResponse(resp, null); // 200 => {}
     }
 
-
+    //other functions - mostly from petShop
     private static class GamesListWrapper {
 
         List<GameData> games;
@@ -101,21 +95,15 @@ public class ServerFacade {
     private static class AuthRes {
         String username, authToken;
     }
-
     private static class CreateGameRequest {
         String gameName;
         CreateGameRequest(String n) { gameName=n; }
     }
     private static class CreateGameResult { int gameID; }
-
     private static class JoinGameRequest {
         String playerColor; int gameID;
         JoinGameRequest(String c, int id) { playerColor=c; gameID=id; }
     }
-
-    //private static class GamesListWrapper { java.util.List<GameData> games; }
-
-
 
     private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
 //        var request = HttpRequest.newBuilder()

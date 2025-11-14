@@ -143,7 +143,7 @@ public class PostloginClient {
 
         int numChosen;
         try {
-            numChosen = Integer.parseInt(params[0]);
+            numChosen = Integer.parseInt(params[1]);
         } catch (Exception e) {
             return "Choose game that is actually listed in: 'list;.";
         }
