@@ -1,6 +1,7 @@
 package client;
 
 import Facade.ServerFacade;
+import model.AuthData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,9 +31,54 @@ public class phase5tests {
 
     @Test
     void registerNegative() {
-        facade.register("bob","pw","b@e.com");
-        var again = facade.register("bob","pw","b@e.com");
+        facade.register("bob", "pw", "b@e.com");
+        AuthData again = facade.register("bob", "pw", "b@e.com");
         assertNull(again); // until I add real exception handling
     }
+
+    @Test
+    void loginPositive() {
+
+    }
+
+    @Test
+    void loginNegative() {
+
+    }
+    @Test
+    void logoutPositive() {
+
+    }
+    @Test
+    void logoutNegative() {
+
+    }
+    @Test
+    void listGamesPositive() {
+
+    }
+    @Test
+    void listGamesNegative() {
+
+    }
+    @Test
+    void createGamePositive() {
+
+    }
+    @Test
+    void createGameNegative() {
+
+    }
+    @Test
+    void joinGamePositive() {
+
+    }
+    @Test
+    void joinGameNegative() {
+
+    }
+
+
+
 
 }

@@ -153,9 +153,11 @@ public class ServerFacade {
             if (body != null) {
 //                throw ResponseException.fromJson(body);
                 System.out.print("Server Facade 2 error");
+                return null;
             }
 
             System.out.print("ServerFacade 3 error");
+            return null;
             //throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
         }
 
