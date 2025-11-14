@@ -53,7 +53,7 @@ public class BoardDrawer {
         StringBuilder sb = new StringBuilder();
 
         String[] filesWhite = {"a ","b ","c","d ","e ","f","g ","h"};
-        String[] filesBlack = {"h","g","f","e","d","c","b","a"};
+        String[] filesBlack = {"h ","g ","f","e ","d ","c","b ","a"};
         String[] files = whitePerspective ? filesWhite : filesBlack;
 
         // Top file labels

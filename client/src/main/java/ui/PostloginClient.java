@@ -131,7 +131,7 @@ public class PostloginClient {
         }
 
         // Color (default WHITE)
-        String color = (params.length >= 3) ? params[2].toUpperCase() : "WHITE";
+        String color = (params.length >= 3) ? params[2].toUpperCase() : "Color must be WHITE or Black";
         if (!"WHITE".equals(color) && !"BLACK".equals(color)) {
             return "Color must be WHITE or BLACK.";
         }
