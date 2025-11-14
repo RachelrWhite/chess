@@ -110,28 +110,54 @@ public class PostloginClient {
     }
 
     private String playGame(String[] params) {
-        if (params.length < 1 || !"game".equalsIgnoreCase(params[0])) {
+        if (params.length < 2 || !"game".equalsIgnoreCase(params[0])) {
             return "usage: play game <#fromList> [WHITE|BLACK]";
         }
-        int numChosen;
-        try {
-            numChosen = Integer.parseInt(params[0]);
-        } catch (Exception e) {
-            return "Choose a number from the 'list'.";
+
+        if (lastListed == null || lastListed.isEmpty()) {
+            return "No games selected. Run 'list games' first.";
         }
 
-        String color = (params.length >= 2) ? params[1].toUpperCase() : "WHITE";
-        if (!color.equals("WHITE") && !color.equals("BLACK")) {
+        // index into lastListed
+        int index;
+        try {
+            index = Integer.parseInt(params[1]) - 1; // 1-based -> 0-based
+        } catch (NumberFormatException e) {
+            return "Choose a number from the last 'list games' output.";
+        }
+
+        if (index < 0 || index >= lastListed.size()) {
+            return "Choose a number between 1 and " + lastListed.size() + " from 'list games'.";
+        }
+
+        // Color (default WHITE)
+        String color = (params.length >= 3) ? params[2].toUpperCase() : "WHITE";
+        if (!"WHITE".equals(color) && !"BLACK".equals(color)) {
             return "Color must be WHITE or BLACK.";
         }
 
-        var chosen = lastListed.get(numChosen - 1);
-        server.joinGame(session.authToken(), color, chosen.gameID());
+        var game = lastListed.get(index);
+        String me = session.username(); // or however you get the logged-in username
+
+        // Who (if anyone) already has this color?
+        String takenBy = switch (color) {
+            case "WHITE" -> game.whiteUsername();
+            case "BLACK" -> game.blackUsername();
+            default -> null; // should never happen
+        };
+
+        // Block if someone else already has that seat
+        if (takenBy != null && !takenBy.equals(me)) {
+            return "That game's " + color + " seat is already taken by " + takenBy + ".";
+        }
+
+        // Just try to join. If your joinGame doesn't throw checked exceptions,
+        // this will compile as-is.
+        server.joinGame(session.authToken(), color, game.gameID());
 
         boolean whitePerspective = !"BLACK".equals(color);
-        System.out.println(BoardDrawer.drawInitial(whitePerspective)); // see tiny helper below
-        return "Joined '" + chosen.gameName() + "' as " + color + ".";
-        // later: parse number/color, join, draw board
+        System.out.println(BoardDrawer.drawInitial(whitePerspective));
+        return "Joined '" + game.gameName() + "' as " + color + ".";
     }
 
     private String observeGame(String[] params) {

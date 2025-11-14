@@ -43,9 +43,9 @@ public class PreloginClient {
 
 
     public String eval(String input) {
-        String[] tokens = input.trim().toLowerCase().split("\\s+");
-        String cmd = (tokens.length > 0 && !tokens[0].isBlank()) ? tokens[0] : "help";
-        String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+        String[] rawString = input.trim().split("\\s+");
+        String cmd = (rawString.length > 0 && !rawString[0].isBlank()) ? rawString[0].toLowerCase() : "help";
+        String[] params = Arrays.copyOfRange(rawString, 1, rawString.length);
 
         switch (cmd) {
             case "q", "quit" -> { return "quit"; }
@@ -62,11 +62,14 @@ public class PreloginClient {
             return "usage: register <USERNAME> <PASSWORD> <EMAIL>";
         }
         // call server.register later; for now just stub a message:
-        System.out.println("Registered & logged in as " + params[0]);
-        //if successful register {
-            var auth = server.register(params[0], params[1], params[2]);
-            //var session = new Session(params[0], /*authtoken from facade later*/ "token");
-            new PostloginClient(server, new Session(auth.username(), auth.authToken())).run();
+        var auth = server.register(params[0], params[1], params[2]);
+        if (auth == null) {
+            return "Error: could not register (username may already be taken).";
+        }
+
+        System.out.println("Registered & logged in as " + auth.username());
+        var session = new Session(auth.username(), auth.authToken());
+        new PostloginClient(server, session).run();
         return "";
     }
 
@@ -74,11 +77,20 @@ public class PreloginClient {
         if (params.length < 2) {
             return "usage: login <USERNAME> <PASSWORD>";
         }
-        System.out.println("Logged in as " + params[0]);
-        // if successful login {
-            var auth = server.login(params[0], params[1]);
-            var session = new Session(params[0], /*authtoken from facade later*/ "token");
-            new PostloginClient(server, new Session(auth.username(), auth.authToken())).run();
+        // Asks the server to log in
+        var auth = server.login(params[0], params[1]);
+
+        if (auth == null) {
+            return "Error: invalid username or password.";
+        }
+
+        System.out.println("Logged in as " + auth.username());
+
+        // Enter postlogin with the real token
+        var session = new Session(auth.username(), auth.authToken());
+        new PostloginClient(server, session).run();
+
+        // After postlogin returns, just drop back to prelogin loop
         return "";
     }
 
