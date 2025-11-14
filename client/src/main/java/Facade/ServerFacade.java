@@ -164,10 +164,10 @@ public class ServerFacade {
             var body = response.body();
             if (body != null) {
 //                throw ResponseException.fromJson(body);
-                System.out.print("we freaked ServerFacade2");
+                System.out.print("Server Facade 2 error");
             }
 
-            System.out.print("we freaked ServerFacade3");
+            System.out.print("ServerFacade 3 error");
             //throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
         }
 

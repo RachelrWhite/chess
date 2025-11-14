@@ -80,8 +80,9 @@ public class PreloginClient {
         // call server.register later; for now just stub a message:
         System.out.println("Registered & logged in as " + params[0]);
         //if sucessful register {
-            var session = new Session(params[0], /*authtoken from facade later*/ "token");
-            new PostloginClient(server, session).run();
+            var auth = server.register(params[0], params[1], params[2]);
+            //var session = new Session(params[0], /*authtoken from facade later*/ "token");
+            new PostloginClient(server, new Session(auth.username(), auth.authToken())).run();
         return "";
     }
 
@@ -91,8 +92,9 @@ public class PreloginClient {
         }
         System.out.println("Logged in as " + params[0]);
         // if sucessful login {
+            var auth = server.login(params[0], params[1]);
             var session = new Session(params[0], /*authtoken from facade later*/ "token");
-            new PostloginClient(server, session).run();
+            new PostloginClient(server, new Session(auth.username(), auth.authToken())).run();
         return "";
     }
 

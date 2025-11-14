@@ -139,7 +139,15 @@ public class PostloginClient {
         }
         // later: draw board from white perspective
 
-        return "Observing game (stub)";
+        int numChosen;
+        try {
+            numChosen = Integer.parseInt(params[0]);
+        } catch (Exception e) {
+            return "Choose game that is actually listed in: 'list;.";
+        }
+        var chosen = lastListed.get(numChosen - 1);
+        System.out.println(BoardDrawer.drawInitial(true)); // observer is from the white perspective
+        return "Observing '" + chosen.gameName() + "'.";
     }
 
     public String postloginHelp() {
