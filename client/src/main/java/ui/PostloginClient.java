@@ -151,8 +151,6 @@ public class PostloginClient {
             return "That game's " + color + " seat is already taken by " + takenBy + ".";
         }
 
-        // Just try to join. If your joinGame doesn't throw checked exceptions,
-        // this will compile as-is.
         server.joinGame(session.authToken(), color, game.gameID());
 
         boolean whitePerspective = !"BLACK".equals(color);
@@ -164,8 +162,6 @@ public class PostloginClient {
         if (params.length < 2 || !"game".equalsIgnoreCase(params[0])) {
             return "usage: observe game <#fromList>";
         }
-        // later: draw board from white perspective
-
         int numChosen;
         try {
             numChosen = Integer.parseInt(params[1]);
@@ -178,12 +174,7 @@ public class PostloginClient {
     }
 
     public String postloginHelp() {
-//        if (state == State.SIGNEDOUT) {
-//            return """
-//                    - signIn <yourname>
-//                    - quit
-//                    """;
-//        }
+
         return """
                 - Postlogin Commands:
                 - create game <gameName>
