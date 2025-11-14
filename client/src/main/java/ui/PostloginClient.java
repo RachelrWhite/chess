@@ -75,10 +75,13 @@ public class PostloginClient {
 
     private String createGame(String[] params) {
         if (params.length < 2 || !"game".equalsIgnoreCase(params[0])) {
-            return "usage: create <gameName>";
+            return "usage: create game <gameName>";
         }
-        String gameName = String.join(" ", Arrays.copyOfRange(params, 1, params.length));
-        // eventually we are going to create server.createGame(session.authToken(), gameName);
+        String gameName = String.join(" ", java.util.Arrays.copyOfRange(params, 1, params.length));
+        int id = server.createGame(session.authToken(), gameName);
+        if (id <= 0) {
+            return "Could not create game. Try again.";
+        }
         return "Created game: " + gameName;
     }
 
@@ -88,13 +91,13 @@ public class PostloginClient {
         }
         var games = server.listGames(session.authToken());
         if (games == null) {
-            lastListed = List.of();
-        } else {
-            lastListed = games;
-        }
-        if (lastListed.isEmpty()) {
+            lastListed = java.util.List.of();
             return "No games created yet. Create one with: create game <name>";
         }
+        lastListed = games;
+//        if (lastListed.isEmpty()) {
+//            return "No games created yet. Create one with: create game <name>";
+//        }
         var sb = new StringBuilder("Games:\n");
 
         for (int i = 0; i < lastListed.size(); i++) {
@@ -131,7 +134,6 @@ public class PostloginClient {
         return "Joined '" + chosen.gameName() + "' as " + color + ".";
         // later: parse number/color, join, draw board
     }
-
 
     private String observeGame(String[] params) {
         if (params.length < 2 || !"game".equalsIgnoreCase(params[0])) {
