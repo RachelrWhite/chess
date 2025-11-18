@@ -8,6 +8,8 @@ import com.google.gson.Gson;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import model.*;
+import io.javalin.Javalin;
+import io.javalin.websocket.WsConfig;
 
 import java.util.Collections;
 import java.util.Map;
@@ -25,6 +27,7 @@ public class Server {
 
 
     public Server() {
+        javalin = Javalin.create(config -> config.staticFiles.add("web"));
         var dao = new MySqlDataAccess();
 
         userDataAccess = dao;
@@ -272,6 +275,8 @@ public class Server {
         ((MySqlDataAccess) userDataAccess).clear();
         ctx.status(200);
     }
+
+    javalin.ws("/ws", new WebSocketHandler());
 
 }
 
