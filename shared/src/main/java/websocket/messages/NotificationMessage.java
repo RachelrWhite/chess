@@ -12,4 +12,3 @@ public class NotificationMessage extends ServerMessage {
         return message;
     }
 }
-//testing the commit
