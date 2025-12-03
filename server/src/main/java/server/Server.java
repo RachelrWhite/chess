@@ -10,6 +10,7 @@ import io.javalin.http.Context;
 import model.*;
 import io.javalin.Javalin;
 import io.javalin.websocket.WsConfig;
+import websocket.WebSocketHandler;
 
 import java.util.Collections;
 import java.util.Map;
@@ -27,7 +28,7 @@ public class Server {
 
 
     public Server() {
-        javalin = Javalin.create(config -> config.staticFiles.add("web"));
+        //javalin = Javalin.create(config -> config.staticFiles.add("web"));
         var dao = new MySqlDataAccess();
 
         userDataAccess = dao;
@@ -51,6 +52,13 @@ public class Server {
                             .contentType("application/json")
                             .result(new Gson().toJson(Map.of("message", "Error: " + e.getMessage())));
                 });
+        //javalin.ws("/ws", new WebSocketHandler());
+        WebSocketHandler webSocketHandler = new WebSocketHandler();
+        javalin.ws("/connect", ws -> {
+            ws.onConnect(webSocketHandler);
+            ws.onMessage(webSocketHandler);
+            ws.onClose(webSocketHandler);
+        });
     }
 
 
@@ -276,7 +284,6 @@ public class Server {
         ctx.status(200);
     }
 
-    javalin.ws("/ws", new WebSocketHandler());
 
 }
 
