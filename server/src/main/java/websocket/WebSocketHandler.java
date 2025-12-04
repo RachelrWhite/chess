@@ -165,7 +165,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String moveSummary = username + " moved " + command.getMove();
             connections.broadcastToGame(gameID, ServerMessage.notification(moveSummary), session);
 
-            // I dont really know if we need these but we will see (extra notificaitons)
+            // I don't really know if we need these, but we will see (extra notificaitons)
             boolean whiteInCheck = game.isInCheck(ChessGame.TeamColor.WHITE);
             boolean blackInCheck = game.isInCheck(ChessGame.TeamColor.BLACK);
 
