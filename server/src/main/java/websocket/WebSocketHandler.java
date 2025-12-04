@@ -21,6 +21,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     MySqlDataAccess data;
     private final ConnectionManager connections = new ConnectionManager();
 
+    public WebSocketHandler(MySqlDataAccess data) {
+        this.data = data;
+    }
+
     @Override
     public void handleConnect(WsConnectContext ctx) {
         System.out.println("Websocket connected");
@@ -29,12 +33,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     @Override
     public void handleMessage(WsMessageContext ctx) {
+        System.out.println("HandleMessage got called");
         try {
             var command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             switch (command.getCommandType()) {
                 case CONNECT -> connect(command.getAuthToken(), ctx.session);
-                //break;
-                //case MAKE_MOVE -> MakeMoveCommand(command.visitorName(), ctx.session);
+                case MAKE_MOVE -> MakeMove(command.visitorName(), ctx.session);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -49,19 +53,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void connect(String authToken, Session session) {
         System.out.println("CONNECT");
         try {
-//            AuthData authData = data.getAuth(authToken);
-//            if (authData == null) {
-//                System.out.println("Invalid auth token (WebSocketHandler file CONNECT)");
-//                session.close();
-//                return;
-//            }
+            System.out.println("This is the authdata" + authToken);
+            AuthData authData = data.getAuth(authToken);
+            if (authData == null) {
+                System.out.println("Invalid auth token (WebSocketHandler file CONNECT)");
+                session.close();
+                return;
+            }
             connections.add(session);
             System.out.println("Connected sessions: " + connections.connections.size());
         } catch (Exception ex) {
             System.out.println("WebsocketHandlerConnect Function Error");
         }
-        try {
-            session.close();
-        } catch (Exception ignored) {}
     }
+
+    private void makeMove()
 }

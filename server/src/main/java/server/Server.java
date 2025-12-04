@@ -53,8 +53,10 @@ public class Server {
                             .result(new Gson().toJson(Map.of("message", "Error: " + e.getMessage())));
                 });
         //javalin.ws("/ws", new WebSocketHandler());
-        WebSocketHandler webSocketHandler = new WebSocketHandler();
-        javalin.ws("/connect", ws -> {
+        System.out.println("before the websocket is called");
+        WebSocketHandler webSocketHandler = new WebSocketHandler(dao);
+        javalin.ws("/ws", ws -> {
+            System.out.println("after the websocket is called");
             ws.onConnect(webSocketHandler);
             ws.onMessage(webSocketHandler);
             ws.onClose(webSocketHandler);
