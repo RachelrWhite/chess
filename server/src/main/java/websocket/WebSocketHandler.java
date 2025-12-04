@@ -44,8 +44,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             switch (command.getCommandType()) {
                 case CONNECT -> connect(command.getAuthToken(), command.getGameID(), ctx.session);
                 case MAKE_MOVE -> makeMove(ctx, json);
-                //case LEAVE -> leave(ctx, json);
-                //case RESIGN -> resign(ctx, json);
+                case LEAVE -> leave(ctx, json);
+                case RESIGN -> resign(ctx, json);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -73,6 +73,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             //validate the game
             GameData gameData = data.getGame(gameID);
+            System.out.println("GameData for gameID " + gameID + " is: " + gameData);
             if (gameData == null) {
                 connections.send(session, ServerMessage.error("Error: game does not exist"));
                 session.close();
@@ -114,6 +115,152 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void makeMove(WsMessageContext ctx, String json) {
+        System.out.println("MAKE_MOVE");
+        Session session = ctx.session;
 
+        try {
+            MakeMoveCommand command = new Gson().fromJson(json, MakeMoveCommand.class);
+
+            //get who the person is
+            GameInfo gameInfo = connections.getInfo(session);
+            if (gameInfo == null) {
+                connections.send(session, ServerMessage.error("Error: not connected to a game"));
+                return;
+            }
+
+            int gameID = gameInfo.gameID();
+            String username = gameInfo.username();
+            ChessGame.TeamColor color = gameInfo.playerColor(); //this is gonna be null if it just a mere observer
+
+            //This will load the game from DB. amen
+            GameData gameData = data.getGame(gameID);
+            if (gameData == null) {
+                connections.send(session, ServerMessage.error("Error: game does not exist"));
+                return;
+            }
+            ChessGame game = gameData.game();
+            if (color == null) {
+                connections.send(session, ServerMessage.error("Error: observers cannot move pieces"));
+                return;
+            }
+
+            if (game.getTeamTurn() != color) {
+                connections.send(session, ServerMessage.error("Error: it is not your turn"));
+                return;
+            }
+
+            // this is where they can give it a shot to try and move - riveting
+            try {
+                game.makeMove(command.getMove());
+            } catch (Exception e) {
+                connections.send(session, ServerMessage.error("Error: illegal move"));
+                return;
+            }
+
+            //this line is intended to save the updated gameData to the database so fingers crossed on this one
+            data.updateGame(gameData);
+
+            connections.broadcastToGame(gameID, ServerMessage.loadGame(game), null);
+
+            String moveSummary = username + " moved " + command.getMove();
+            connections.broadcastToGame(gameID, ServerMessage.notification(moveSummary), session);
+
+            // I dont really know if we need these but we will see (extra notificaitons)
+            boolean whiteInCheck = game.isInCheck(ChessGame.TeamColor.WHITE);
+            boolean blackInCheck = game.isInCheck(ChessGame.TeamColor.BLACK);
+
+            if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                connections.broadcastToGame(gameID, ServerMessage.notification("White is in checkmate"), null);
+            } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+                connections.broadcastToGame(gameID, ServerMessage.notification("Black is in checkmate"), null);
+            } else if (whiteInCheck || blackInCheck) {
+                String who = whiteInCheck ? "White" : "Black";
+                connections.broadcastToGame(gameID, ServerMessage.notification(who + " is in check"), null);
+            }
+
+        } catch (Exception ex) {
+            System.out.println("WebSocketHandler makeMove error");
+            ex.printStackTrace();
+            try {
+                connections.send(session, ServerMessage.error("Error: internal server error"));
+            } catch (IOException ignored) {}
+        }
+
+    }
+
+    private void leave(WsMessageContext ctx, String json) {
+        System.out.println("LEAVE");
+        Session session = ctx.session;
+        try {
+            UserGameCommand command = new Gson().fromJson(json, UserGameCommand.class);
+
+            GameInfo gameInfo = connections.getInfo(session);
+            if (gameInfo == null) {
+                connections.send(session, ServerMessage.error("Error: not connected to a game"));
+                return;
+            }
+
+            int gameID = gameInfo.gameID(); //this gameID is coming in CLUTCH!!!
+            String username = gameInfo.username();
+
+            GameData gameData = data.getGame(gameID);
+            if (gameData == null) {
+                connections.send(session, ServerMessage.error("Error: game does not exist"));
+                return;
+            }
+
+
+            //this is where if i need to clear their spot in DB
+
+            connections.remove(session);
+
+            String msg = username + " left the game :(";
+            connections.broadcastToGame(gameID, ServerMessage.notification(msg), session);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            //lowkey i dont know if this is going to break everything but we must go forth
+            try {
+                connections.send(session, ServerMessage.error("Error: internal erro :("));
+            } catch (Exception ignored) {
+            }
+        }
+
+    }
+
+    private void resign(WsMessageContext ctx, String json) {
+        Session session = ctx.session;
+
+        try {
+            UserGameCommand command = new Gson().fromJson(json, UserGameCommand.class);
+
+            GameInfo info = connections.getInfo(session);
+            if (info == null) {
+                connections.send(session, ServerMessage.error("Error: not connected to a game"));
+                return;
+            }
+
+            int gameID = info.gameID();
+            String username = info.username();
+
+            GameData gameData = data.getGame(gameID);
+            if (gameData == null) {
+                connections.send(session, ServerMessage.error("Error: game does not exist"));
+                return;
+            }
+
+            // Mark game over in DB somehow, like:
+            // gameData = gameData.withGameOver(true).withWinner(...);
+            // data.updateGame(gameData);
+
+            String msg = username + " resigned the game";
+            connections.broadcastToGame(gameID, ServerMessage.notification(msg), null);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            try {
+                connections.send(session, ServerMessage.error("Error: internal server error"));
+            } catch (IOException ignored) {}
+        }
     }
 }
