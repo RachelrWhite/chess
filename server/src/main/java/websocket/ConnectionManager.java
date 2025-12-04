@@ -6,6 +6,7 @@ import websocket.messages.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+
 public class ConnectionManager {
     public final HashMap<Session, GameInfo> connections = new HashMap<>();
 
@@ -19,6 +20,15 @@ public class ConnectionManager {
 
     public GameInfo getInfo(Session session) {
         return connections.get(session);
+    }
+
+    //we might not need this but we will see
+
+    public void send(Session session, ServerMessage message) throws IOException {
+        if (session != null && session.isOpen()) {
+            String msg = new Gson().toJson(message);
+            session.getRemote().sendString(msg);
+        }
     }
 
     // this one is going to broadcast to every player in the game

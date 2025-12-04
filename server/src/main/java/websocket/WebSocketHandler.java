@@ -1,4 +1,5 @@
 package websocket;
+import chess.ChessGame;
 import com.google.gson.Gson;
 //import exception.ResponseException;
 import dataaccess.MySqlDataAccess;
@@ -12,6 +13,7 @@ import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.commands.*;
+import websocket.messages.ServerMessage;
 //import messages.
 //import webSocketMessages.Notification;
 import java.io.IOException;
@@ -35,13 +37,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void handleMessage(WsMessageContext ctx) {
         System.out.println("HandleMessage got called");
         try {
-            var command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+            //var command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+            var json = ctx.message();
+            var command = new Gson().fromJson(json, UserGameCommand.class);
+
             switch (command.getCommandType()) {
-                case CONNECT -> connect(command.getAuthToken(), ctx.session);
-                case MAKE_MOVE -> MakeMove(command.visitorName(), ctx.session);
+                case CONNECT -> connect(command.getAuthToken(), command.getGameID(), ctx.session);
+                case MAKE_MOVE -> makeMove(ctx, json);
+                //case LEAVE -> leave(ctx, json);
+                //case RESIGN -> resign(ctx, json);
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -50,22 +57,63 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    private void connect(String authToken, Session session) {
+    private void connect(String authToken, int gameID, Session session) {
         System.out.println("CONNECT");
         try {
             System.out.println("This is the authdata" + authToken);
+            //get that auth validated fr fr
             AuthData authData = data.getAuth(authToken);
             if (authData == null) {
                 System.out.println("Invalid auth token (WebSocketHandler file CONNECT)");
+                connections.send(session, ServerMessage.error("Error: invalid auth token"));
                 session.close();
                 return;
             }
-            connections.add(session);
+            String username = authData.username();
+
+            //validate the game
+            GameData gameData = data.getGame(gameID);
+            if (gameData == null) {
+                connections.send(session, ServerMessage.error("Error: game does not exist"));
+                session.close();
+                return;
+            }
+            //this is where we see what the role is (if they are WHITE,BLACK,observer)
+            //I made this so the observer stays null - could need to change that so they see the white prespective
+            ChessGame.TeamColor color = null;
+            if (username.equals(gameData.whiteUsername())) {
+                color = ChessGame.TeamColor.WHITE;
+            } else if (username.equals(gameData.blackUsername())) {
+                color = ChessGame.TeamColor.BLACK;
+            }
+
+            //throw that game info into the connections hashmap - this is lowkey genius
+            GameInfo info = new GameInfo(gameID, username, color);
+            connections.add(session, info);
+
+            //this is where we send LOAD_GAME back to this client
+            ChessGame game = gameData.game();
+            connections.send(session, ServerMessage.loadGame(game));
+
+            //now we send the NOTIFICATION to others in the game(all the commonfolk)
+            String role; //this is how i'm going to keep track of the people who are observing or not in a game
+            if (color == null) {
+                role = "as an observer";
+            } else {
+                role = "as " + color.toString().toLowerCase();
+            }
+
+            String joinSummary = username + " joined the game " + role;
+            connections.broadcastToGame(gameID, ServerMessage.notification(joinSummary), session);
+
             System.out.println("Connected sessions: " + connections.connections.size());
         } catch (Exception ex) {
             System.out.println("WebsocketHandlerConnect Function Error");
+            ex.printStackTrace(); //this one builds character
         }
     }
 
-    private void makeMove()
+    private void makeMove(WsMessageContext ctx, String json) {
+
+    }
 }
