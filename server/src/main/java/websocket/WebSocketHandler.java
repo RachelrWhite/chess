@@ -122,11 +122,20 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             MakeMoveCommand command = new Gson().fromJson(json, MakeMoveCommand.class);
 
+            AuthData authData = data.getAuth(command.getAuthToken());
+            if (authData == null) {
+                connections.send(session, ServerMessage.error("Error: invalid auth token"));
+                return;
+            }
             //get who the person is
             GameInfo gameInfo = connections.getInfo(session);
             if (gameInfo == null) {
                 connections.send(session, ServerMessage.error("Error: not connected to a game"));
                 return;
+            }
+        // this better fix my authtoken problem fr fr fr fr fr
+            if (!authData.username().equals(gameInfo.username())){
+                connections.send(session, ServerMessage.error("Error: invalid auth token"));
             }
 
             int gameID = gameInfo.gameID();
