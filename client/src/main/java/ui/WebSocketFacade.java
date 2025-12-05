@@ -20,15 +20,11 @@ public class WebSocketFacade extends Endpoint {
     private final ServerMessageHandler messageHandler;
     private final Gson gson = new Gson();
 
-    // Your UI / gameplay code implements this
     public interface ServerMessageHandler {
         void handle(ServerMessage message);
     }
 
-    public WebSocketFacade(String baseUrl,
-                           String authToken,
-                           int gameID,
-                           ServerMessageHandler messageHandler) throws IOException {
+    public WebSocketFacade(String baseUrl, String authToken, int gameID, ServerMessageHandler messageHandler) throws IOException {
         this.authToken = authToken;
         this.gameID = gameID;
         this.messageHandler = messageHandler;

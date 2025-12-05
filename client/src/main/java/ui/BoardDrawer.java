@@ -1,4 +1,8 @@
 package ui;
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
+
 
 public class BoardDrawer {
 
@@ -48,6 +52,53 @@ public class BoardDrawer {
 
         return drawBoard(board, whitePerspective);
     }
+
+    //this is a functions I am making for when the board is full
+    public static String drawGame(ChessGame game, boolean whitePerspective) {
+        // Board[row][col], row 0 = rank 8, row 7 = rank 1
+        String[][] board = new String[8][8];
+
+        // Start with all empty squares
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                board[r][c] = EscapeSequences.EMPTY;
+            }
+        }
+
+        // Fill in pieces from the ChessGame
+        var chessBoard = game.getBoard();
+        for (int rank = 1; rank <= 8; rank++) {        // rank 1..8
+            for (int file = 1; file <= 8; file++) {    // file 1..8
+                ChessPosition pos = new ChessPosition(rank, file);
+                ChessPiece piece = chessBoard.getPiece(pos);
+                if (piece == null) continue;
+
+                // BoardDrawer uses row 0 = rank 8, row 7 = rank 1
+                int rowIndex = 8 - rank;   // rank 8 -> 0, rank 1 -> 7
+                int colIndex = file - 1;   // file 1 (a) -> 0
+
+                board[rowIndex][colIndex] = pieceToEscape(piece);
+            }
+        }
+
+        return drawBoard(board, whitePerspective);
+    }
+
+    //this function is also for phase 6 - it allwos the
+    private static String pieceToEscape(ChessPiece piece) {
+        boolean w = piece.getTeamColor() == ChessGame.TeamColor.WHITE;
+
+        return switch (piece.getPieceType()) {
+            case KING   -> w ? EscapeSequences.WHITE_KING   : EscapeSequences.BLACK_KING;
+            case QUEEN  -> w ? EscapeSequences.WHITE_QUEEN  : EscapeSequences.BLACK_QUEEN;
+            case ROOK   -> w ? EscapeSequences.WHITE_ROOK   : EscapeSequences.BLACK_ROOK;
+            case BISHOP -> w ? EscapeSequences.WHITE_BISHOP : EscapeSequences.BLACK_BISHOP;
+            case KNIGHT -> w ? EscapeSequences.WHITE_KNIGHT : EscapeSequences.BLACK_KNIGHT;
+            case PAWN   -> w ? EscapeSequences.WHITE_PAWN   : EscapeSequences.BLACK_PAWN;
+        };
+    }
+
+
 
     private static String drawBoard(String[][] board, boolean whitePerspective) {
         StringBuilder sb = new StringBuilder();
