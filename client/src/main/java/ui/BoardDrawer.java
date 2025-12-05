@@ -115,26 +115,31 @@ public class BoardDrawer {
         sb.append('\n');
 
         if (whitePerspective) {
-            // White at bottom: show rank 8 down to 1, files a..h left→right
-            for (int row = 7; row >= 0; row--) {
-                int rank = row + 1;
+            for (int visualRow = 0; visualRow < 8; visualRow++) {
+                int boardRow = visualRow;
+                int rank = 8 - visualRow;
+
                 sb.append(' ').append(rank).append(' ');
-                for (int col = 0; col < 8; col++) {
-                    appendSquare(sb, board[row][col], row, col);
+                for (int visualCol = 0; visualCol < 8; visualCol++) {
+                    int boardCol = visualCol;
+                    appendSquare(sb, board[boardRow][boardCol], boardRow, boardCol);
                 }
                 sb.append(' ').append(rank).append('\n');
             }
         } else {
-            // Black at bottom: show rank 1 up to 8, files h..a left→right
-            for (int row = 0; row < 8; row++) {
-                int rank = row + 1;
+            for (int visualRow = 0; visualRow < 8; visualRow++) {
+                int rank = visualRow + 1;
+                int boardRow = 7 - visualRow;
+
                 sb.append(' ').append(rank).append(' ');
-                for (int col = 7; col >= 0; col--) {
-                    appendSquare(sb, board[row][col], row, col);
+                for (int visualCol = 0; visualCol < 8; visualCol++) {
+                    int boardCol = 7 - visualCol;
+                    appendSquare(sb, board[boardRow][boardCol], boardRow, boardCol);
                 }
                 sb.append(' ').append(rank).append('\n');
             }
         }
+
 
         // Bottom file labels
         sb.append("   ");
@@ -157,8 +162,10 @@ public class BoardDrawer {
         String bg = light
                 //this used to be light grey - change if the TAs get mad
                 //the other one was dark grey - spelled with an e
-                ? EscapeSequences.SET_BG_COLOR_YELLOW
-                : EscapeSequences.SET_BG_COLOR_MAGENTA;
+//                ? EscapeSequences.SET_BG_COLOR_YELLOW
+//                : EscapeSequences.SET_BG_COLOR_MAGENTA;
+                ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY
+                : EscapeSequences.SET_BG_COLOR_DARK_GREY;
 
         String textColor = colorForPiece(piece);
 
@@ -183,7 +190,8 @@ public class BoardDrawer {
                 piece.equals(EscapeSequences.WHITE_KNIGHT) ||
                 piece.equals(EscapeSequences.WHITE_PAWN)) {
             // if TAs get mad change this to WHITE
-            return EscapeSequences.SET_TEXT_COLOR_RED;
+            //return EscapeSequences.SET_TEXT_COLOR_RED;
+            return EscapeSequences.SET_TEXT_COLOR_WHITE;
         }
 
         // Black pieces

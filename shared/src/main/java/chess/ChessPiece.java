@@ -24,7 +24,8 @@ public class ChessPiece {
     }
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
-    private MoveCalculator moveCalculator;
+    private transient MoveCalculator moveCalculator;
+    //private MoveCalculator moveCalculator;
 
     //called anytime I create a new chess piece
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
@@ -44,7 +45,23 @@ public class ChessPiece {
     /**
      * The various different chess piece options
      */
+    //this makes me so nervous but added for phase 6
+    private void ensureMoveCalculator() {
+        if (this.moveCalculator != null) {
+            return;
+        }
 
+        this.moveCalculator = switch (this.type) {
+            case PAWN ->  new PawnMovesCalculator();
+            case ROOK -> new RookMovesCalculator();
+            case BISHOP -> new BishopMovesCalculator();
+            case KNIGHT -> new KnightMovesCalculator();
+            case QUEEN -> new QueenMovesCalculator();
+            case KING -> new KingMovesCalculator();
+        };
+    }
+
+    //this is the end of the phase 6 insert
     /**
      * @return Which team this chess piece belongs to
      */
@@ -66,7 +83,11 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
+//    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+//        return moveCalculator.calculate(board, myPosition, this);
+//    }
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        ensureMoveCalculator();
         return moveCalculator.calculate(board, myPosition, this);
     }
 

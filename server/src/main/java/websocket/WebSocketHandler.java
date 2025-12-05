@@ -61,7 +61,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void connect(String authToken, int gameID, Session session) {
         System.out.println("CONNECT");
         try {
-            System.out.println("This is the authdata" + authToken);
+            //System.out.println("This is the authdata" + authToken);
             //get that auth validated fr fr
             AuthData authData = data.getAuth(authToken);
             if (authData == null) {
@@ -139,8 +139,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.send(session, ServerMessage.error("Error: game does not exist"));
                 return;
             }
-
             ChessGame game = gameData.game();
+
+            if (game.isGameOver()) {
+                connections.send(session, ServerMessage.error("Error: game is already over"));
+                return;
+            }
 
             if (color == null) {
                 connections.send(session, ServerMessage.error("Error: observers cannot move pieces"));
@@ -156,8 +160,31 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             try {
                 game.makeMove(command.getMove());
             } catch (Exception e) {
-                connections.send(session, ServerMessage.error("Error: illegal move"));
+                connections.send(session, ServerMessage.error("Error: Illegal move"));
                 return;
+            }
+
+            boolean whiteInCheck = game.isInCheck(ChessGame.TeamColor.WHITE);
+            boolean blackInCheck = game.isInCheck(ChessGame.TeamColor.BLACK);
+
+            boolean whiteCheckmate = game.isInCheckmate(ChessGame.TeamColor.WHITE);
+            boolean blackCheckmate = game.isInCheckmate(ChessGame.TeamColor.BLACK);
+
+            if (whiteCheckmate) {
+                game.setGameOver(true);
+                connections.broadcastToGame(gameID, ServerMessage.notification("White is in checkmate"), null);
+            } else if (blackCheckmate) {
+                game.setGameOver(true);
+                connections.broadcastToGame(gameID, ServerMessage.notification("Black is in checkmate"), null);
+            } else if (whiteInCheck || blackInCheck) {
+                String who = whiteInCheck ? "White" : "Black";
+                connections.broadcastToGame(gameID, ServerMessage.notification(who + " is in check"), null);
+            }
+
+
+            if (game.isInStalemate(ChessGame.TeamColor.WHITE) || game.isInStalemate(ChessGame.TeamColor.BLACK)) {
+                game.setGameOver(true);
+                connections.broadcastToGame(gameID, ServerMessage.notification("Game is a stalemate"), null);
             }
             GameData updated = new GameData(
                     gameData.gameID(),
@@ -173,21 +200,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String moveSummary = username + " moved " + command.getMove();
             connections.broadcastToGame(gameID, ServerMessage.notification(moveSummary), session);
 
-
-            boolean whiteInCheck = game.isInCheck(ChessGame.TeamColor.WHITE);
-            boolean blackInCheck = game.isInCheck(ChessGame.TeamColor.BLACK);
-
-            if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
-                connections.broadcastToGame(gameID, ServerMessage.notification("White is in checkmate"), null);
-            } else if (game.isInCheckmate(ChessGame.TeamColor.BLACK)) {
-                connections.broadcastToGame(gameID, ServerMessage.notification("Black is in checkmate"), null);
-            } else if (whiteInCheck || blackInCheck) {
-                String who = whiteInCheck ? "White" : "Black";
-                connections.broadcastToGame(gameID, ServerMessage.notification(who + " is in check"), null);
-            }
-
         } catch (Exception ex) {
-            System.out.println("WebSocketHandler makeMove error");
+            //System.out.println("WebSocketHandler makeMove error");
             ex.printStackTrace();
             try {
                 connections.send(session, ServerMessage.error("Exception: " + ex));
@@ -207,7 +221,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 return;
             }
 
-            int gameID = gameInfo.gameID(); //this gameID is coming in CLUTCH!!!
+            int gameID = gameInfo.gameID();
             String username = gameInfo.username();
 
             GameData gameData = data.getGame(gameID);
@@ -216,26 +230,44 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 return;
             }
 
+            // 1) Update DB: clear their seat if they are a player
+            String white = gameData.whiteUsername();
+            String black = gameData.blackUsername();
 
-            //this is where if i need to clear their spot in DB
+            if (username.equals(white)) {
+                white = null;
+            } else if (username.equals(black)) {
+                black = null;
+            }
+            // observers: no DB change
 
+            GameData updated = new GameData(
+                    gameData.gameID(),
+                    white,
+                    black,
+                    gameData.gameName(),
+                    gameData.game()
+            );
+            data.updateGame(updated);
+
+            // 2) Remove their websocket connection
             connections.remove(session);
 
+            // 3) Notify others
             String msg = username + " left the game :(";
             connections.broadcastToGame(gameID, ServerMessage.notification(msg), session);
 
         } catch (Exception e) {
             e.printStackTrace();
-            //lowkey i dont know if this is going to break everything but we must go forth
             try {
-                connections.send(session, ServerMessage.error("Error: internal erro :("));
-            } catch (Exception ignored) {
-            }
+                connections.send(session, ServerMessage.error("Error: internal error :("));
+            } catch (Exception ignored) {}
         }
-
     }
 
+
     private void resign(WsMessageContext ctx, String json) {
+        System.out.println("RESIGN");
         Session session = ctx.session;
 
         try {
@@ -249,6 +281,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             int gameID = info.gameID();
             String username = info.username();
+            ChessGame.TeamColor color = info.playerColor(); // null if observer
+
+            if (color == null) {
+                connections.send(session, ServerMessage.error("Error: observers cannot resign"));
+                return;
+            }
 
             GameData gameData = data.getGame(gameID);
             if (gameData == null) {
@@ -256,9 +294,22 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 return;
             }
 
-            // Mark game over in DB somehow, like:
-            // gameData = gameData.withGameOver(true).withWinner(...);
-            // data.updateGame(gameData);
+            ChessGame game = gameData.game();
+            if (game.isGameOver()) {
+                connections.send(session, ServerMessage.error("Error: game is already over"));
+                return;
+            }
+
+            game.setGameOver(true);
+
+            GameData updated = new GameData(
+                    gameData.gameID(),
+                    gameData.whiteUsername(),
+                    gameData.blackUsername(),
+                    gameData.gameName(),
+                    game
+            );
+            data.updateGame(updated);
 
             String msg = username + " resigned the game";
             connections.broadcastToGame(gameID, ServerMessage.notification(msg), null);
@@ -270,4 +321,5 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             } catch (IOException ignored) {}
         }
     }
+
 }

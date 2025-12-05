@@ -51,7 +51,6 @@ public class PostloginClient {
                 try {
                     server.logout(session.authToken());
                 } catch (Exception e) {
-                    // Return a user-friendly error so it prints in the REPL
                     yield "Logout error: " + e.getMessage();
                 }
                 yield "logout"; // signal the loop to exit postlogin
@@ -156,8 +155,9 @@ public class PostloginClient {
 
         ChessGame.TeamColor teamColor = "WHITE".equals(color) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
         boolean whitePerspective = !"BLACK".equals(color);
-        System.out.println(BoardDrawer.drawInitial(whitePerspective));
+        //System.out.println(BoardDrawer.drawInitial(whitePerspective));
         //return "Joined '" + game.gameName() + "' as " + color + ".";
+        //System.out.println("Joined " + game.gameName() + " as " + color + ".");
         try {
             String serverUrl = server.getServerUrl();
             InGameClient inGame = new InGameClient(serverUrl, session.authToken(), game.gameID(), teamColor);
@@ -186,7 +186,7 @@ public class PostloginClient {
         var chosen = lastListed.get(numChosen - 1);
         server.joinGame(session.authToken(), null, chosen.gameID());
 
-        System.out.println(BoardDrawer.drawInitial(true)); // observer is from the white perspective
+        //System.out.println(BoardDrawer.drawInitial(true)); // observer is from the white perspective
 
         try {
             String serverUrl = server.getServerUrl();

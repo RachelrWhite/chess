@@ -41,7 +41,7 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String json) {
-                    System.out.println("RAW WS message: " + json);
+                    //System.out.println("RAW WS message: " + json);
                     ServerMessage msg = gson.fromJson(json, ServerMessage.class);
                     messageHandler.handle(msg);
                 }

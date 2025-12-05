@@ -65,28 +65,28 @@ public class InGameClient implements WebSocketFacade.ServerMessageHandler {
 
     @Override
     public void handle(ServerMessage message) {
-        System.out.println("Got WS message: " + message.getServerMessageType());
+        //System.out.println("Got WS message: " + message.getServerMessageType());
 
         switch (message.getServerMessageType()) {
             case LOAD_GAME -> {
-                System.out.println("LOAD_GAME got called");
+                //System.out.println("LOAD_GAME got called");
                 this.game = message.getGame();
                 redrawBoard();
             }
             case NOTIFICATION -> System.out.println(message.getMessage());
-            case ERROR -> System.out.println("Server error: " + message.getErrorMessage());
+            case ERROR -> System.out.println(message.getErrorMessage());
         }
     }
 
 
     private String redrawBoard() {
-        System.out.println("this is calling the redrawBoard function game " + game);
+        //System.out.println("this is calling the redrawBoard function game " + game);
         if (game == null) {
             return "Waiting for game state from server...";
         }
 
-        boolean whitePerspective = (playerColor != ChessGame.TeamColor.BLACK);
-        String boardString = BoardDrawer.drawGame(game, whitePerspective);
+        boolean isWhitePerspective = (playerColor != ChessGame.TeamColor.BLACK);
+        String boardString = BoardDrawer.drawGame(game, isWhitePerspective);
         System.out.print(boardString);
 
         return "";

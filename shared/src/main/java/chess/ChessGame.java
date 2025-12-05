@@ -20,11 +20,13 @@ public class ChessGame {
     //throwing in some fields
     private ChessBoard newBoard;
     private TeamColor turn;
+    private boolean gameOver;
 
     public ChessGame() {
         newBoard = new ChessBoard();
         newBoard.resetBoard();
         turn = TeamColor.WHITE;
+        gameOver = false;
     }
 
 
@@ -45,6 +47,13 @@ public class ChessGame {
         turn = team;
     }
 
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
+    }
 
     private boolean tempMoveKing(ChessPosition from, ChessMove move, TeamColor color) {
         ChessPiece moving = newBoard.getPiece(from);
