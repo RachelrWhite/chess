@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import websocket.commands.UserGameCommand;
+import websocket.commands.MakeMoveCommand;
 import websocket.messages.ServerMessage;
 
 public class WebSocketFacade extends Endpoint {
@@ -24,29 +25,30 @@ public class WebSocketFacade extends Endpoint {
         void handle(ServerMessage message);
     }
 
-    public WebSocketFacade(String baseUrl, String authToken, int gameID, ServerMessageHandler messageHandler) throws IOException {
+    public WebSocketFacade(String baseUrl, String authToken, int gameID,
+                           ServerMessageHandler messageHandler) throws IOException {
         this.authToken = authToken;
         this.gameID = gameID;
         this.messageHandler = messageHandler;
 
         try {
-            // http://localhost:8080  ->  ws://localhost:8080/ws
             String wsUrl = baseUrl.replaceFirst("^http", "ws") + "/ws";
             URI socketURI = new URI(wsUrl);
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
 
-            // Incoming messages from the server
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String json) {
+                    System.out.println("RAW WS message: " + json);
                     ServerMessage msg = gson.fromJson(json, ServerMessage.class);
                     messageHandler.handle(msg);
                 }
             });
 
-            // Immediately send CONNECT once the socket is up
+
+            // CONNECT command
             UserGameCommand connect = new UserGameCommand(
                     UserGameCommand.CommandType.CONNECT,
                     this.authToken,
@@ -55,24 +57,22 @@ public class WebSocketFacade extends Endpoint {
             sendCommand(connect);
 
         } catch (DeploymentException | URISyntaxException ex) {
-            // Wrap into a normal IOException for the caller
             throw new IOException("Failed to open WebSocket connection", ex);
         }
     }
 
-    // Endpoint requires this, but we don't need to do anything here
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
         // no-op
     }
 
-    // --- Public API for your gameplay UI ---
+    // --- Public API ---
 
     public void makeMove(ChessMove move) throws IOException {
-        UserGameCommand cmd = new UserGameCommand(
-                UserGameCommand.CommandType.MAKE_MOVE,
+        MakeMoveCommand cmd = new MakeMoveCommand(
                 authToken,
-                gameID
+                gameID,
+                move
         );
         sendCommand(cmd);
     }
@@ -101,9 +101,7 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    // --- Helper ---
-
-    private void sendCommand(UserGameCommand cmd) throws IOException {
+    private void sendCommand(Object cmd) throws IOException {
         String json = gson.toJson(cmd);
         session.getBasicRemote().sendText(json);
     }

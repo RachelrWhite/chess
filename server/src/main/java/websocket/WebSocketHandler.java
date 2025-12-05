@@ -38,8 +38,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("HandleMessage got called");
         try {
             //var command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-            var json = ctx.message();
-            var command = new Gson().fromJson(json, UserGameCommand.class);
+           var json = ctx.message();
+           var command = new Gson().fromJson(json, UserGameCommand.class);
+            //UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
 
             switch (command.getCommandType()) {
                 case CONNECT -> connect(command.getAuthToken(), command.getGameID(), ctx.session);
@@ -138,7 +139,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.send(session, ServerMessage.error("Error: game does not exist"));
                 return;
             }
+
             ChessGame game = gameData.game();
+
             if (color == null) {
                 connections.send(session, ServerMessage.error("Error: observers cannot move pieces"));
                 return;
@@ -156,16 +159,21 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.send(session, ServerMessage.error("Error: illegal move"));
                 return;
             }
-
-            //this line is intended to save the updated gameData to the database so fingers crossed on this one
-            data.updateGame(gameData);
+            GameData updated = new GameData(
+                    gameData.gameID(),
+                    gameData.whiteUsername(),
+                    gameData.blackUsername(),
+                    gameData.gameName(),
+                    game        // updated ChessGame
+            );
+            data.updateGame(updated);
 
             connections.broadcastToGame(gameID, ServerMessage.loadGame(game), null);
 
             String moveSummary = username + " moved " + command.getMove();
             connections.broadcastToGame(gameID, ServerMessage.notification(moveSummary), session);
 
-            // I don't really know if we need these, but we will see (extra notificaitons)
+
             boolean whiteInCheck = game.isInCheck(ChessGame.TeamColor.WHITE);
             boolean blackInCheck = game.isInCheck(ChessGame.TeamColor.BLACK);
 
@@ -182,10 +190,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             System.out.println("WebSocketHandler makeMove error");
             ex.printStackTrace();
             try {
-                connections.send(session, ServerMessage.error("Error: internal server error"));
+                connections.send(session, ServerMessage.error("Exception: " + ex));
             } catch (IOException ignored) {}
         }
-
     }
 
     private void leave(WsMessageContext ctx, String json) {

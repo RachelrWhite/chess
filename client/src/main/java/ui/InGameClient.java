@@ -27,64 +27,71 @@ public class InGameClient implements WebSocketFacade.ServerMessageHandler {
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("leave-game")) {
-            System.out.println("[ingame] > ");
+            System.out.print("[inGame] > ");
             String line = scanner.nextLine();
 
             try {
                 result = eval(line);
                 if (!result.isBlank() && !result.equals("leave-game")) {
-                    System.out.println("result");
+                    System.out.println(result);
                 }
             } catch (Throwable e) {
                 System.out.println("Error: " + e.getMessage());
             }
         }
+
         try {
             webSocket.close();
-        } catch (IOException ignored) {
-        }
+        } catch (IOException ignored) {}
     }
+
 
     public String eval(String input) {
         String[] raw = input.trim().split("\\s+");
-        String command = (raw.length > 0 && !raw[0].isBlank()) ? raw[0].toLowerCase() : "help";
+        String cmd = (raw.length > 0 && !raw[0].isBlank()) ? raw[0].toLowerCase() : "help";
         String[] params = java.util.Arrays.copyOfRange(raw, 1, raw.length);
 
-        return switch (command) {
+        return switch (cmd) {
             case "h", "help" -> inGameHelp();
             case "redraw", "print" -> redrawBoard();
             case "m", "move" -> moveCommand(params);
             case "leave" -> leaveGame();
             case "resign" -> resignGame();
-            case "quit", "exit" -> "leave-game"; // alias to leave
+            case "quit", "exit" -> "leave-game";
             default -> "Unknown command. Type 'help'.";
         };
     }
 
+
     @Override
     public void handle(ServerMessage message) {
+        System.out.println("Got WS message: " + message.getServerMessageType());
+
         switch (message.getServerMessageType()) {
             case LOAD_GAME -> {
-                this.game = message.getGame(); // adjust getter names if needed
-                // Auto-redraw whenever server sends new state
-                boolean whitePerspective = (playerColor != ChessGame.TeamColor.BLACK);
-                String boardString = BoardDrawer.drawGame(game, whitePerspective);
-                System.out.print(boardString);
+                System.out.println("LOAD_GAME got called");
+                this.game = message.getGame();
+                redrawBoard();
             }
             case NOTIFICATION -> System.out.println(message.getMessage());
-            case ERROR -> System.out.println("Server error: " + message.getMessage());
+            case ERROR -> System.out.println("Server error: " + message.getErrorMessage());
         }
     }
 
+
     private String redrawBoard() {
+        System.out.println("this is calling the redrawBoard function game " + game);
         if (game == null) {
-            System.out.println("Waiting for game state from server...");
+            return "Waiting for game state from server...";
         }
-        boolean isWhitePerspective = (playerColor != ChessGame.TeamColor.BLACK);
-        String output = BoardDrawer.drawGame(game, isWhitePerspective);
-        System.out.print(output);
-        return "Current Board";
+
+        boolean whitePerspective = (playerColor != ChessGame.TeamColor.BLACK);
+        String boardString = BoardDrawer.drawGame(game, whitePerspective);
+        System.out.print(boardString);
+
+        return "";
     }
+
 
     private String moveCommand(String[] params) {
         if (params.length < 2) {
@@ -123,7 +130,7 @@ public class InGameClient implements WebSocketFacade.ServerMessageHandler {
         } catch (IOException e) {
             return "Error sending leave: " + e.getMessage();
         }
-        return "leave-game";  // sentinel so run() exits
+        return "leave-game";
     }
 
     private String resignGame() {
