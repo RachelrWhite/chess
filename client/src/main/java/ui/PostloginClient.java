@@ -1,8 +1,10 @@
 package ui;
 
+import chess.ChessGame;
 import facade.ServerFacade;
 import model.GameData;
 
+import java.io.IOException;
 import java.util.*;
 
 public class PostloginClient {
@@ -121,7 +123,7 @@ public class PostloginClient {
         // index into lastListed
         int index;
         try {
-            index = Integer.parseInt(params[1]) - 1; // 1-based -> 0-based
+            index = Integer.parseInt(params[1]) - 1; //this was 1 based and now it is 0 based
         } catch (NumberFormatException e) {
             return "Choose a number from the last 'list games' output.";
         }
@@ -137,25 +139,34 @@ public class PostloginClient {
         }
 
         var game = lastListed.get(index);
-        String me = session.username(); // or however you get the logged-in username
+        String me = session.username();
 
-        // Who (if anyone) already has this color?
         String takenBy = switch (color) {
             case "WHITE" -> game.whiteUsername();
             case "BLACK" -> game.blackUsername();
             default -> null; // should never happen
         };
 
-        // Block if someone else already has that seat
+        // Block if someone else already has that color
         if (takenBy != null && !takenBy.equals(me)) {
             return "That game's " + color + " seat is already taken by " + takenBy + ".";
         }
 
         server.joinGame(session.authToken(), color, game.gameID());
 
+        ChessGame.TeamColor teamColor = "WHITE".equals(color) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
         boolean whitePerspective = !"BLACK".equals(color);
         System.out.println(BoardDrawer.drawInitial(whitePerspective));
-        return "Joined '" + game.gameName() + "' as " + color + ".";
+        //return "Joined '" + game.gameName() + "' as " + color + ".";
+        try {
+            String serverUrl = server.getServerUrl();
+            InGameClient inGame = new InGameClient(serverUrl, session.authToken(), game.gameID(), teamColor);
+            inGame.run();
+        } catch (IOException e) {
+            return "Error starting in-game client: " + e.getMessage();
+        }
+
+        return "Returned from game '" + game.gameName() + "'.";
     }
 
     private String observeGame(String[] params) {
@@ -166,11 +177,26 @@ public class PostloginClient {
         try {
             numChosen = Integer.parseInt(params[1]);
         } catch (Exception e) {
-            return "Choose game that is actually listed in: 'list;.";
+            return "Choose game that is actually listed in: 'list'.";
         }
+        if (numChosen < 1 || numChosen > lastListed.size()) {
+            return "Choose a number between 1 and " + lastListed.size() + ".";
+        }
+
         var chosen = lastListed.get(numChosen - 1);
+        server.joinGame(session.authToken(), null, chosen.gameID());
+
         System.out.println(BoardDrawer.drawInitial(true)); // observer is from the white perspective
-        return "Observing '" + chosen.gameName() + "'.";
+
+        try {
+            String serverUrl = server.getServerUrl();
+            InGameClient inGame = new InGameClient(serverUrl, session.authToken(), chosen.gameID(), null);
+            inGame.run();
+        } catch (IOException e) {
+            return "Error starting observer client: " + e.getMessage();
+        }
+
+        return "Stopped Observing '" + chosen.gameName() + "'.";
     }
 
     public String postloginHelp() {

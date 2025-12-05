@@ -20,6 +20,10 @@ public class ServerFacade {
         serverUrl = url;
     }
 
+    public String getServerUrl() {
+        return serverUrl;
+    }
+
     // end points
     public AuthData register(String username, String password, String email) {
         var req  = buildRequest("POST", "/user", new RegisterRequest(username, password, email), null);
@@ -159,15 +163,12 @@ public class ServerFacade {
 //                throw ResponseException.fromJson(body);
                 return null;
             }
-
             return null;
             //throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
         }
-
         if (responseClass != null) {
             return new Gson().fromJson(response.body(), responseClass);
         }
-
         return null;
     }
 
