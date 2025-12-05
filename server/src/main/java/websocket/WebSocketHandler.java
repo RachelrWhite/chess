@@ -164,6 +164,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 return;
             }
 
+            String whiteName = gameData.whiteUsername();
+            String blackName = gameData.blackUsername();
+
             boolean whiteInCheck = game.isInCheck(ChessGame.TeamColor.WHITE);
             boolean blackInCheck = game.isInCheck(ChessGame.TeamColor.BLACK);
 
@@ -172,14 +175,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             if (whiteCheckmate) {
                 game.setGameOver(true);
-                connections.broadcastToGame(gameID, ServerMessage.notification("White is in checkmate"), null);
+                String msg = whiteName + " (white) is in checkmate";
+                connections.broadcastToGame(gameID, ServerMessage.notification(msg), null);
             } else if (blackCheckmate) {
                 game.setGameOver(true);
-                connections.broadcastToGame(gameID, ServerMessage.notification("Black is in checkmate"), null);
+                String msg = blackName + " (black) is in checkmate";
+                connections.broadcastToGame(gameID, ServerMessage.notification(msg), null);
             } else if (whiteInCheck || blackInCheck) {
-                String who = whiteInCheck ? "White" : "Black";
-                connections.broadcastToGame(gameID, ServerMessage.notification(who + " is in check"), null);
+                String whoName = whiteInCheck ? whiteName : blackName;
+                String whoColor = whiteInCheck ? "white" : "black";
+                String msg = whoName + " (" + whoColor + ") is in check";
+                connections.broadcastToGame(gameID, ServerMessage.notification(msg), null);
             }
+
 
 
             if (game.isInStalemate(ChessGame.TeamColor.WHITE) || game.isInStalemate(ChessGame.TeamColor.BLACK)) {

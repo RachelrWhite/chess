@@ -54,35 +54,51 @@ public class BoardDrawer {
     }
 
     //this is a functions I am making for when the board is full
-    public static String drawGame(ChessGame game, boolean whitePerspective) {
+    public static String drawGame(ChessGame game, boolean whitePerspective, java.util.Set<ChessPosition> highlights) {
         // Board[row][col], row 0 = rank 8, row 7 = rank 1
         String[][] board = new String[8][8];
+        boolean[][] highlightGrid = new boolean[8][8];
 
         // Start with all empty squares
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 8; c++) {
                 board[r][c] = EscapeSequences.EMPTY;
+                highlightGrid[r][c] = false;
             }
         }
 
-        // Fill in pieces from the ChessGame
         var chessBoard = game.getBoard();
-        for (int rank = 1; rank <= 8; rank++) {        // rank 1..8
-            for (int file = 1; file <= 8; file++) {    // file 1..8
+        for (int rank = 1; rank <= 8; rank++) {
+            for (int file = 1; file <= 8; file++) {
                 ChessPosition pos = new ChessPosition(rank, file);
                 ChessPiece piece = chessBoard.getPiece(pos);
-                if (piece == null) continue;
-
-                // BoardDrawer uses row 0 = rank 8, row 7 = rank 1
-                int rowIndex = 8 - rank;   // rank 8 -> 0, rank 1 -> 7
-                int colIndex = file - 1;   // file 1 (a) -> 0
-
-                board[rowIndex][colIndex] = pieceToEscape(piece);
+                if (piece != null) {
+                    int rowIndex = 8 - rank;
+                    int colIndex = file - 1;
+                    board[rowIndex][colIndex] = pieceToEscape(piece);
+                }
             }
         }
 
-        return drawBoard(board, whitePerspective);
+        if (highlights != null) {
+            for (ChessPosition pos : highlights) {
+                int rank = pos.getRow();
+                int file = pos.getColumn();
+                int rowIndex = 8 - rank;
+                int colIndex = file - 1;
+                if (rowIndex >= 0 && rowIndex < 8 && colIndex >= 0 && colIndex < 8) {
+                    highlightGrid[rowIndex][colIndex] = true;
+                }
+            }
+        }
+
+        return drawBoard(board, whitePerspective, highlightGrid);
     }
+
+    public static String drawGame(ChessGame game, boolean whitePerspective) {
+        return drawGame(game, whitePerspective, null);
+    }
+
 
     //this function is also for phase 6 - it allwos the
     private static String pieceToEscape(ChessPiece piece) {
@@ -100,7 +116,8 @@ public class BoardDrawer {
 
 
 
-    private static String drawBoard(String[][] board, boolean whitePerspective) {
+    private static String drawBoard(String[][] board, boolean whitePerspective,
+                                    boolean[][] highlightGrid) {
         StringBuilder sb = new StringBuilder();
 
         String[] filesWhite = {"a ","b ","c","d ","e ","f","g ","h"};
@@ -115,31 +132,32 @@ public class BoardDrawer {
         sb.append('\n');
 
         if (whitePerspective) {
-            for (int visualRow = 0; visualRow < 8; visualRow++) {
-                int boardRow = visualRow;
-                int rank = 8 - visualRow;
-
+            // White at bottom: show rank 8 (boardRow 0) down to rank 1 (boardRow 7)
+            for (int boardRow = 0; boardRow < 8; boardRow++) {
+                int rank = 8 - boardRow;          // 8,7,...,1
                 sb.append(' ').append(rank).append(' ');
-                for (int visualCol = 0; visualCol < 8; visualCol++) {
-                    int boardCol = visualCol;
-                    appendSquare(sb, board[boardRow][boardCol], boardRow, boardCol);
+                for (int boardCol = 0; boardCol < 8; boardCol++) {
+                    boolean hl = (highlightGrid != null && highlightGrid[boardRow][boardCol]);
+                    appendSquare(sb, board[boardRow][boardCol], boardRow, boardCol, hl);
                 }
                 sb.append(' ').append(rank).append('\n');
             }
         } else {
+            // Black at bottom: from black's POV, top is rank 1 (boardRow 7), bottom is rank 8 (boardRow 0)
             for (int visualRow = 0; visualRow < 8; visualRow++) {
-                int rank = visualRow + 1;
-                int boardRow = 7 - visualRow;
-
+                int boardRow = 7 - visualRow;     // 7,6,...,0
+                int rank = visualRow + 1;         // 1,2,...,8
                 sb.append(' ').append(rank).append(' ');
+
+                // Files h..a left→right: map visualCol 0..7 to boardCol 7..0
                 for (int visualCol = 0; visualCol < 8; visualCol++) {
                     int boardCol = 7 - visualCol;
-                    appendSquare(sb, board[boardRow][boardCol], boardRow, boardCol);
+                    boolean hl = (highlightGrid != null && highlightGrid[boardRow][boardCol]);
+                    appendSquare(sb, board[boardRow][boardCol], boardRow, boardCol, hl);
                 }
                 sb.append(' ').append(rank).append('\n');
             }
         }
-
 
         // Bottom file labels
         sb.append("   ");
@@ -148,24 +166,31 @@ public class BoardDrawer {
         }
         sb.append('\n');
 
-        // Make sure colors are reset when we’re done
         sb.append(EscapeSequences.RESET_TEXT_COLOR)
                 .append(EscapeSequences.RESET_BG_COLOR);
 
         return sb.toString();
     }
 
-    private static void appendSquare(StringBuilder sb, String piece, int row, int col) {
-        // this one right here has to be the light color fr fr
+
+    // Backward-compatible old signature:
+    private static String drawBoard(String[][] board, boolean whitePerspective) {
+        return drawBoard(board, whitePerspective, null);
+    }
+
+
+    private static void appendSquare(StringBuilder sb, String piece, int row, int col, boolean highlight) {
         boolean light = (row + col) % 2 == 0;
 
-        String bg = light
-                //this used to be light grey - change if the TAs get mad
-                //the other one was dark grey - spelled with an e
-//                ? EscapeSequences.SET_BG_COLOR_YELLOW
-//                : EscapeSequences.SET_BG_COLOR_MAGENTA;
-                ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY
-                : EscapeSequences.SET_BG_COLOR_DARK_GREY;
+        String bg;
+        if (highlight) {
+            // pick a nice highlight color your EscapeSequences supports
+            bg = EscapeSequences.SET_BG_COLOR_YELLOW;  // or GREEN, etc.
+        } else {
+            bg = light
+                    ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY
+                    : EscapeSequences.SET_BG_COLOR_DARK_GREY;
+        }
 
         String textColor = colorForPiece(piece);
 
@@ -175,6 +200,7 @@ public class BoardDrawer {
                 .append(EscapeSequences.RESET_TEXT_COLOR)
                 .append(EscapeSequences.RESET_BG_COLOR);
     }
+
 
     private static String colorForPiece(String piece) {
         if (piece == null || piece.equals(EscapeSequences.EMPTY)) {

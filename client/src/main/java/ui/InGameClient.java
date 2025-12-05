@@ -8,6 +8,8 @@ import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.HashSet;
 
 //import static ui.BoardDrawer.drawBoard;
 
@@ -15,6 +17,8 @@ public class InGameClient implements WebSocketFacade.ServerMessageHandler {
     private final WebSocketFacade webSocket;
     private ChessGame game;
     private final ChessGame.TeamColor playerColor;
+
+    private Set<ChessPosition> highlightSquares = null;
 
     public InGameClient(String serverUrl, String authToken, int gameID, ChessGame.TeamColor playerColor) throws IOException {
         this.playerColor = playerColor;
@@ -57,6 +61,7 @@ public class InGameClient implements WebSocketFacade.ServerMessageHandler {
             case "m", "move" -> moveCommand(params);
             case "leave" -> leaveGame();
             case "resign" -> resignGame();
+            case "highlight", "legal" -> highlightCommand(params);
             case "quit", "exit" -> "leave-game";
             default -> "Unknown command. Type 'help'.";
         };
@@ -65,32 +70,42 @@ public class InGameClient implements WebSocketFacade.ServerMessageHandler {
 
     @Override
     public void handle(ServerMessage message) {
-        //System.out.println("Got WS message: " + message.getServerMessageType());
-
         switch (message.getServerMessageType()) {
             case LOAD_GAME -> {
-                //System.out.println("LOAD_GAME got called");
                 this.game = message.getGame();
+                this.highlightSquares = null;
                 redrawBoard();
             }
-            case NOTIFICATION -> System.out.println(message.getMessage());
-            case ERROR -> System.out.println(message.getErrorMessage());
+            case NOTIFICATION -> {
+                System.out.println();
+                System.out.println(message.getMessage());
+            }
+            case ERROR -> {
+                System.out.println();
+                System.out.println(message.getErrorMessage());
+            }
         }
     }
 
 
+
     private String redrawBoard() {
-        //System.out.println("this is calling the redrawBoard function game " + game);
         if (game == null) {
             return "Waiting for game state from server...";
         }
 
-        boolean isWhitePerspective = (playerColor != ChessGame.TeamColor.BLACK);
-        String boardString = BoardDrawer.drawGame(game, isWhitePerspective);
+        boolean isWhitePerspective =
+                (playerColor == null || playerColor == ChessGame.TeamColor.WHITE);
+
+        String boardString = BoardDrawer.drawGame(game, isWhitePerspective, highlightSquares);
+
+        //Make sure i start the board on a fresh line
+        System.out.println();
         System.out.print(boardString);
 
         return "";
     }
+
 
 
     private String moveCommand(String[] params) {
@@ -142,6 +157,43 @@ public class InGameClient implements WebSocketFacade.ServerMessageHandler {
         return "leave-game";
     }
 
+    private String highlightCommand(String[] params) {
+        if (game == null) {
+            return "No game loaded yet.";
+        }
+        if (params.length < 1) {
+            return "usage: highlight <square>";
+        }
+
+        ChessPosition from = parsePosition(params[0]);
+        if (from == null) {
+            return "Invalid square. Example: highlight e2";
+        }
+
+        var moves = game.validMoves(from);
+        if (moves == null || moves.isEmpty()) {
+            return "No legal moves for that piece.";
+        }
+
+        Set<ChessPosition> squares = new HashSet<>();
+        squares.add(from);                 //current square
+        for (ChessMove m : moves) {
+            squares.add(m.getEndPosition());
+        }
+
+        this.highlightSquares = squares;
+
+        //redraw board with highlights
+        boolean isWhitePerspective =
+                (playerColor == null || playerColor == ChessGame.TeamColor.WHITE);
+
+        String boardString = BoardDrawer.drawGame(game, isWhitePerspective, highlightSquares);
+        System.out.println();
+        System.out.print(boardString);
+
+        return "";
+    }
+
     // all them helpers
 
     private ChessPosition parsePosition(String s) {
@@ -177,6 +229,7 @@ public class InGameClient implements WebSocketFacade.ServerMessageHandler {
                 - help
                 - redraw
                 - move <from> <to> [promotionPiece(q|r|b|n)]
+                - highlight <square>
                 - leave
                 - resign
                 """;
