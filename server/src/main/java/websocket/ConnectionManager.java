@@ -37,9 +37,15 @@ public class ConnectionManager {
         for (var entry : connections.entrySet()) {
             var session = entry.getKey();
             var info = entry.getValue();
-            if (!session.isOpen()) continue;
-            if (info.gameID() != gameID) continue;
-            if (exclude != null && session.equals(exclude)) continue;
+            if (!session.isOpen()) {
+                continue;
+            }
+            if (info.gameID() != gameID) {
+                continue;
+            }
+            if (exclude != null && session.equals(exclude)) {
+                continue;
+            }
             session.getRemote().sendString(json);
         }
     }

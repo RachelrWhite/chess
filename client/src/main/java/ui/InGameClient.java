@@ -203,8 +203,12 @@ public class InGameClient implements WebSocketFacade.ServerMessageHandler {
         char fileChar = Character.toLowerCase(s.charAt(0)); // a-h
         char rankChar = s.charAt(1);                        // 1-8
 
-        if (fileChar < 'a' || fileChar > 'h') return null;
-        if (rankChar < '1' || rankChar > '8') return null;
+        if (fileChar < 'a' || fileChar > 'h') {
+            return null;
+        }
+        if (rankChar < '1' || rankChar > '8') {
+            return null;
+        }
 
         int col = fileChar - 'a' + 1;  // a->1
         int row = rankChar - '0';      // '1'->1
@@ -213,7 +217,9 @@ public class InGameClient implements WebSocketFacade.ServerMessageHandler {
     }
 
     private ChessPiece.PieceType parsePromotion(String s) {
-        if (s == null || s.isEmpty()) return null;
+        if (s == null || s.isEmpty()) {
+            return null;
+        }
         return switch (Character.toLowerCase(s.charAt(0))) {
             case 'q' -> ChessPiece.PieceType.QUEEN;
             case 'r' -> ChessPiece.PieceType.ROOK;

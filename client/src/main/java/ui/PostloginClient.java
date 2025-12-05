@@ -154,10 +154,6 @@ public class PostloginClient {
         server.joinGame(session.authToken(), color, game.gameID());
 
         ChessGame.TeamColor teamColor = "WHITE".equals(color) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
-        boolean whitePerspective = !"BLACK".equals(color);
-        //System.out.println(BoardDrawer.drawInitial(whitePerspective));
-        //return "Joined '" + game.gameName() + "' as " + color + ".";
-        //System.out.println("Joined " + game.gameName() + " as " + color + ".");
         try {
             String serverUrl = server.getServerUrl();
             InGameClient inGame = new InGameClient(serverUrl, session.authToken(), game.gameID(), teamColor);

@@ -8,51 +8,6 @@ public class BoardDrawer {
 
     private BoardDrawer() {}
 
-    public static String drawInitial(boolean whitePerspective) {
-        // Board[row][col], row 0 = rank 8, row 7 = rank 1
-        String[][] board = new String[8][8];
-
-        // throw in that empty board amen
-
-        for (int r = 0; r < 8; r++) {
-            for (int c = 0; c < 8; c++) {
-                board[r][c] = EscapeSequences.EMPTY;
-            }
-        }
-
-        // black back row
-        String[] blackBack = {
-                EscapeSequences.BLACK_ROOK,
-                EscapeSequences.BLACK_KNIGHT,
-                EscapeSequences.BLACK_BISHOP,
-                EscapeSequences.BLACK_QUEEN,
-                EscapeSequences.BLACK_KING,
-                EscapeSequences.BLACK_BISHOP,
-                EscapeSequences.BLACK_KNIGHT,
-                EscapeSequences.BLACK_ROOK
-        };
-
-        String[] whiteBack = {
-                EscapeSequences.WHITE_ROOK,
-                EscapeSequences.WHITE_KNIGHT,
-                EscapeSequences.WHITE_BISHOP,
-                EscapeSequences.WHITE_QUEEN,
-                EscapeSequences.WHITE_KING,
-                EscapeSequences.WHITE_BISHOP,
-                EscapeSequences.WHITE_KNIGHT,
-                EscapeSequences.WHITE_ROOK
-        };
-
-        for (int c = 0; c < 8; c++) {
-            board[0][c] = blackBack[c];                         // throw in that back row for black
-            board[1][c] = EscapeSequences.BLACK_PAWN;           // black pawns (rank 7)
-            board[6][c] = EscapeSequences.WHITE_PAWN;           // white pawns (rank 2)
-            board[7][c] = whiteBack[c];                         // hit them with the back row for white
-        }
-
-        return drawBoard(board, whitePerspective);
-    }
-
     //this is a functions I am making for when the board is full
     public static String drawGame(ChessGame game, boolean whitePerspective, java.util.Set<ChessPosition> highlights) {
         // Board[row][col], row 0 = rank 8, row 7 = rank 1

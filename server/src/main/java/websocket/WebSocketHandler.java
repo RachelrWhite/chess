@@ -118,7 +118,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void makeMove(WsMessageContext ctx, String json) {
         System.out.println("MAKE_MOVE");
         Session session = ctx.session;
-
         try {
             MakeMoveCommand command = new Gson().fromJson(json, MakeMoveCommand.class);
 
@@ -137,11 +136,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             if (!authData.username().equals(gameInfo.username())){
                 connections.send(session, ServerMessage.error("Error: invalid auth token"));
             }
-
             int gameID = gameInfo.gameID();
             String username = gameInfo.username();
             ChessGame.TeamColor color = gameInfo.playerColor(); //this is gonna be null if it just a mere observer
-
             //This will load the game from DB. amen
             GameData gameData = data.getGame(gameID);
             if (gameData == null) {
@@ -149,22 +146,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 return;
             }
             ChessGame game = gameData.game();
-
             if (game.isGameOver()) {
                 connections.send(session, ServerMessage.error("Error: game is already over"));
                 return;
             }
-
             if (color == null) {
                 connections.send(session, ServerMessage.error("Error: observers cannot move pieces"));
                 return;
             }
-
             if (game.getTeamTurn() != color) {
                 connections.send(session, ServerMessage.error("Error: it is not your turn"));
                 return;
             }
-
             // this is where they can give it a shot to try and move - riveting
             try {
                 game.makeMove(command.getMove());
@@ -172,16 +165,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.send(session, ServerMessage.error("Error: Illegal move"));
                 return;
             }
-
             String whiteName = gameData.whiteUsername();
             String blackName = gameData.blackUsername();
 
             boolean whiteInCheck = game.isInCheck(ChessGame.TeamColor.WHITE);
             boolean blackInCheck = game.isInCheck(ChessGame.TeamColor.BLACK);
-
             boolean whiteCheckmate = game.isInCheckmate(ChessGame.TeamColor.WHITE);
             boolean blackCheckmate = game.isInCheckmate(ChessGame.TeamColor.BLACK);
-
             if (whiteCheckmate) {
                 game.setGameOver(true);
                 String msg = whiteName + " (white) is in checkmate";
@@ -196,9 +186,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 String msg = whoName + " (" + whoColor + ") is in check";
                 connections.broadcastToGame(gameID, ServerMessage.notification(msg), null);
             }
-
-
-
             if (game.isInStalemate(ChessGame.TeamColor.WHITE) || game.isInStalemate(ChessGame.TeamColor.BLACK)) {
                 game.setGameOver(true);
                 connections.broadcastToGame(gameID, ServerMessage.notification("Game is a stalemate"), null);
@@ -208,17 +195,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     gameData.whiteUsername(),
                     gameData.blackUsername(),
                     gameData.gameName(),
-                    game        // updated ChessGame
+                    game        //updated ChessGame
             );
             data.updateGame(updated);
-
             connections.broadcastToGame(gameID, ServerMessage.loadGame(game), null);
-
             String moveSummary = username + " moved " + command.getMove();
             connections.broadcastToGame(gameID, ServerMessage.notification(moveSummary), session);
-
         } catch (Exception ex) {
-            //System.out.println("WebSocketHandler makeMove error");
             ex.printStackTrace();
             try {
                 connections.send(session, ServerMessage.error("Exception: " + ex));
